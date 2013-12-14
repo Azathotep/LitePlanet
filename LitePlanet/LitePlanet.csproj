@@ -49,6 +49,16 @@
   <ItemGroup>
     <Folder Include="Content\" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\LiteEngine\LiteEngine\LiteEngine.csproj">
+      <Project>{35c84ce0-5661-4133-98ae-3448f07e93c3}</Project>
+      <Name>LiteEngine</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LiteEngine\MonoGame\MonoGame.Framework\MonoGame.Framework.Windows.csproj">
+      <Project>{7de47032-a904-4c29-bd22-2d235e8d91ba}</Project>
+      <Name>MonoGame.Framework.Windows</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
