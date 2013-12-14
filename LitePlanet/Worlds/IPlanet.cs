@@ -26,7 +26,7 @@ namespace LitePlanet.Worlds
         ITile GetTile(int x, int y);
 
         /// <summary>
-        /// Returns a list of tiles that fall within the specified bounds
+        /// Returns a list of tiles that fall within a rectangle of cartesian world space
         /// </summary>
         /// <param name="cBounds">bounds in cartesian world space</param>
         /// <returns></returns>
