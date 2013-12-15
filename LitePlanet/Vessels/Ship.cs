@@ -26,7 +26,10 @@ namespace LitePlanet.Vessels
             _body.Restitution = 0f;
             _body.Mass = 0.5f;
             _body.Rotation = 0f;
+            _body.LinearVelocity = new Vector2(0, 5);
             FixtureFactory.AttachPolygon(new Vertices(new Vector2[] { new Vector2(0f, -0.4f), new Vector2(0.35f, 0.4f), new Vector2(-0.35f, 0.4f) }), 1f, _body);
+            _body.CollisionCategories = Category.Cat2;
+            _body.CollidesWith = Category.Cat1;
         }
 
         public Vector2 Position

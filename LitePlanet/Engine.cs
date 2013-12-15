@@ -19,12 +19,13 @@ namespace LitePlanet
     class Engine : LiteXnaEngine
     {
         LiteEngine.Textures.Texture _particleTexture = new LiteEngine.Textures.Texture("grass");
-        ParticleList _exhaustParticles = new ParticleList(100);
+        ParticleList _exhaustParticles;
         IShip _ship;
         IPlanet _planet;
 
         protected override void Initialize()
         {
+            _exhaustParticles = new ParticleList(Physics, 100);
             _ship = new Ship(this);
             Renderer.SetDeviceMode(800, 600, true);
             Renderer.Camera.SetViewField(80, 60);
@@ -32,10 +33,13 @@ namespace LitePlanet
 
             Body body = Physics.CreateRectangleBody(10f,10f,1f);
             body.IsStatic = true;
-            body.Restitution = 0.5f;
-            body.Friction = 0.3f;
+
+            body.Restitution = 0.3f;
+            body.Friction = 1f;
             body.Rotation = 0;
             body.Position = new Vector2(0, 0);
+            body.CollisionCategories = Category.Cat1;
+            body.CollidesWith = Category.All;
             base.Initialize();
         }
 
@@ -50,13 +54,14 @@ namespace LitePlanet
                     _ship.ApplyForwardThrust(2f);
                     
                     float m = Math.Min((float)gameTime.ElapsedGameTime.TotalSeconds, (1f / 30f));
-                    for (int i = 0; i < 5; i++)
+                    m = 1;
+                    for (int i = 0; i < 8; i++)
                     {
-                        Vector2 vel = _ship.Velocity * m - _ship.Facing * 0.1f;
-                        vel.X += Dice.Next() * 0.01f - 0.005f;
-                        vel.Y += Dice.Next() * 0.01f - 0.005f;
+                        Vector2 vel = _ship.Velocity * m - _ship.Facing * 5.1f;
+                        vel.X += Dice.Next() * 0.6f - 0.3f;
+                        vel.Y += Dice.Next() * 0.6f - 0.3f;
 
-                        _exhaustParticles.AddParticle(new Particle(_ship.Position, vel, Color.Yellow, 50));
+                        _exhaustParticles.CreateParticle(_ship.Position, vel, Color.Yellow, 50);
                     }
                     break;
                 case Keys.Left:
