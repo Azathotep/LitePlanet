@@ -10,23 +10,24 @@ using FarseerPhysics.Dynamics;
 using LiteEngine.Input;
 using LiteEngine.Core;
 using LiteEngine.Math;
+using LiteEngine.Particles;
 using LitePlanet.Worlds;
 using LitePlanet.Vessels;
-using LitePlanet.Particles;
 
 namespace LitePlanet
 {
     class Engine : LiteXnaEngine
     {
         LiteEngine.Textures.Texture _particleTexture = new LiteEngine.Textures.Texture("particle");
-        ParticleList _exhaustParticles;
+        ParticlePool _exhaustParticles;
         IShip _ship;
         IPlanet _planet;
 
         protected override void Initialize()
         {
             Physics.SetGlobalGravity(new Vector2(0, 1));
-            _exhaustParticles = new ParticleList(Physics, 100);
+
+            _exhaustParticles = ParticleSystem.CreateParticleFactory();
             _ship = new Ship(this);
             Renderer.SetDeviceMode(800, 600, true);
             Renderer.Camera.SetViewField(80, 60);
@@ -61,7 +62,7 @@ namespace LitePlanet
                         Vector2 vel = _ship.Velocity * m - _ship.Facing * 5.1f;
                         vel.X += Dice.Next() * 1.6f - 0.8f;
                         vel.Y += Dice.Next() * 1.6f - 0.8f;
-                        _exhaustParticles.CreateParticle(_ship.Position, vel, 50);
+                        _exhaustParticles.CreateParticle(_ship.Position, vel, 50, true);
                     }
                     break;
                 case Keys.Left:
@@ -77,7 +78,6 @@ namespace LitePlanet
 
         protected override void UpdateFrame(GameTime gameTime, XnaKeyboardHandler keyHandler)
         {
-            _exhaustParticles.Update();
         }
 
         protected override void DrawFrame(GameTime gameTime)
@@ -103,6 +103,8 @@ namespace LitePlanet
             Renderer.BeginDrawToScreen();
             string frameRate = FrameRate + " FPS";
             Renderer.DrawStringBox(frameRate, new RectangleF(10, 10, 120, 10), Color.White);
+
+            Renderer.DrawStringBox("Fuel: " + _ship.Fuel, new RectangleF(10, 30, 120, 10), Color.White);
             Renderer.EndDraw();
         }
     }

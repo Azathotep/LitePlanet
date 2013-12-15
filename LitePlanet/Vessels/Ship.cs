@@ -32,6 +32,15 @@ namespace LitePlanet.Vessels
             _body.CollidesWith = Category.Cat1;
         }
 
+        int _fuel = 1000;
+        public int Fuel
+        {
+            get
+            {
+                return _fuel;
+            }
+        }
+
         public Vector2 Position
         {
             get 
@@ -66,6 +75,9 @@ namespace LitePlanet.Vessels
 
         public void ApplyForwardThrust(float amount)
         {
+            if (_fuel <= 0)
+                return;
+            _fuel--;
             _body.ApplyForce(Facing * amount);
         }
 

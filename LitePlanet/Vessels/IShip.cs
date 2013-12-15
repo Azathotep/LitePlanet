@@ -24,6 +24,11 @@ namespace LitePlanet.Vessels
             get;
         }
 
+        int Fuel
+        {
+            get;
+        }
+
         float Rotation
         {
             get;
