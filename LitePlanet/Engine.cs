@@ -36,6 +36,12 @@ namespace LitePlanet
                 case Keys.Up:
                     _ship.ApplyForwardThrust(1f);
                     break;
+                case Keys.Left:
+                    _ship.ApplyRotateThrust(-0.1f);
+                    break;
+                case Keys.Right:
+                    _ship.ApplyRotateThrust(0.1f);
+                    break;
             }
 
             return base.OnKeyPress(key, gameTime);

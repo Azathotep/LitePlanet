@@ -44,25 +44,28 @@ namespace LitePlanet.Vessels
 
         public Vector2 Facing
         {
-            get { throw new NotImplementedException(); }
+            get 
+            {
+                return new Vector2((float)Math.Sin(Rotation), -(float)Math.Cos(Rotation));;
+            }
         }
 
         public float Rotation
         {
             get 
             {
-                return 0;
+                return _body.Rotation;
             }
         }
 
         public void ApplyForwardThrust(float amount)
         {
-            _body.ApplyForce(new Vector2(0, 1f) * amount);
+            _body.ApplyForce(Facing * amount);
         }
 
         public void ApplyRotateThrust(float amount)
         {
-            throw new NotImplementedException();
+            _body.ApplyTorque(amount);
         }
 
         public void Draw(XnaRenderer renderer)
