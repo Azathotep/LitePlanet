@@ -32,7 +32,7 @@ namespace LitePlanet.Vessels
             _body.CollidesWith = Category.Cat1;
         }
 
-        int _fuel = 1000;
+        int _fuel = 200;
         public int Fuel
         {
             get

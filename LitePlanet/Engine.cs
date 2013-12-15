@@ -20,6 +20,7 @@ namespace LitePlanet
     {
         LiteEngine.Textures.Texture _particleTexture = new LiteEngine.Textures.Texture("particle");
         ParticlePool _exhaustParticles;
+        ParticlePool _smokeParticles;
         IShip _ship;
         IPlanet _planet;
 
@@ -28,6 +29,7 @@ namespace LitePlanet
             Physics.SetGlobalGravity(new Vector2(0, 1));
 
             _exhaustParticles = ParticleSystem.CreateParticleFactory();
+            _smokeParticles = ParticleSystem.CreateParticleFactory();
             _ship = new Ship(this);
             Renderer.SetDeviceMode(800, 600, true);
             Renderer.Camera.SetViewField(80, 60);
@@ -54,22 +56,24 @@ namespace LitePlanet
                     break;
                 case Keys.Up:
                     _ship.ApplyForwardThrust(2f);
-                    
-                    float m = Math.Min((float)gameTime.ElapsedGameTime.TotalSeconds, (1f / 30f));
-                    m = 1;
-                    for (int i = 0; i < 8; i++)
+                    if (_ship.Fuel > 0)
                     {
-                        Vector2 vel = _ship.Velocity * m - _ship.Facing * 5.1f;
-                        vel.X += Dice.Next() * 1.6f - 0.8f;
-                        vel.Y += Dice.Next() * 1.6f - 0.8f;
-                        _exhaustParticles.CreateParticle(_ship.Position, vel, 50, true);
+                        for (int i = 0; i < 8; i++)
+                        {
+                            Vector2 vel = _ship.Velocity - _ship.Facing * 5.1f;
+                            vel.X += Dice.Next() * 1.6f - 0.8f;
+                            vel.Y += Dice.Next() * 1.6f - 0.8f;
+                            _exhaustParticles.CreateParticle(_ship.Position, vel, 50, true);
+                            Vector2 p = _ship.Position - _ship.Facing * 0.7f + Dice.RandomVector(0.3f);
+                            _smokeParticles.CreateParticle(p, _ship.Velocity * 0, 50, false);
+                        }
                     }
                     break;
                 case Keys.Left:
-                    _ship.ApplyRotateThrust(-0.3f);
+                    _ship.ApplyRotateThrust(-0.1f);
                     break;
                 case Keys.Right:
-                    _ship.ApplyRotateThrust(0.3f);
+                    _ship.ApplyRotateThrust(0.1f);
                     break;
             }
 
@@ -91,9 +95,18 @@ namespace LitePlanet
             Renderer.DrawDepth = 0.5f;
             foreach (Particle p in _exhaustParticles.Particles)
             {
-                float particleSize = 0.25f * (p.Life / 50f); // p.Life / 100f * 0.4f; // 0.2f;
+                float particleSize = 0.25f * (p.Life / 50f);
                 float alpha = (float)p.Life * p.Life / (50 * 50);
                 Color color = new Color(1, 1, (float)p.Life / 60f);
+                Renderer.DrawSprite(_particleTexture, new RectangleF(p.Position.X, p.Position.Y, particleSize, particleSize), 0, color, alpha);
+            }
+
+            foreach (Particle p in _smokeParticles.Particles)
+            {
+                float particleSize = 0.4f;
+                float alpha = (float)p.Life * p.Life / (50 * 50);
+                float c = (float)p.Life / 100;
+                Color color = new Color(c, c, c);
                 Renderer.DrawSprite(_particleTexture, new RectangleF(p.Position.X, p.Position.Y, particleSize, particleSize), 0, color, alpha);
             }
 
