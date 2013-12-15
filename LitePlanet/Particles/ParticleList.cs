@@ -7,6 +7,9 @@ using LiteEngine.Physics;
 
 namespace LitePlanet.Particles
 {
+    /// <summary>
+    /// Manages particles that interact with the physics system
+    /// </summary>
     class ParticleList
     {
         PhysicsCore _physics;
@@ -20,7 +23,7 @@ namespace LitePlanet.Particles
             _activeParticles = new LinkedList<Particle>();
         }
 
-        public void CreateParticle(Vector2 position, Vector2 velocity, Color color, int life)
+        public void CreateParticle(Vector2 position, Vector2 velocity, int life)
         {
             Particle newParticle;
             if (_unusedParticles.Count == 0)
@@ -35,7 +38,7 @@ namespace LitePlanet.Particles
             else
                 newParticle = _unusedParticles.Dequeue();
             //setup the particle properties
-            newParticle.Initialize(_physics, position, velocity, color, life);
+            newParticle.Initialize(_physics, position, velocity, life);
             _activeParticles.AddFirst(newParticle);
         }
 

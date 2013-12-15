@@ -18,13 +18,14 @@ namespace LitePlanet
 {
     class Engine : LiteXnaEngine
     {
-        LiteEngine.Textures.Texture _particleTexture = new LiteEngine.Textures.Texture("grass");
+        LiteEngine.Textures.Texture _particleTexture = new LiteEngine.Textures.Texture("particle");
         ParticleList _exhaustParticles;
         IShip _ship;
         IPlanet _planet;
 
         protected override void Initialize()
         {
+            Physics.SetGlobalGravity(new Vector2(0, 1));
             _exhaustParticles = new ParticleList(Physics, 100);
             _ship = new Ship(this);
             Renderer.SetDeviceMode(800, 600, true);
@@ -58,10 +59,9 @@ namespace LitePlanet
                     for (int i = 0; i < 8; i++)
                     {
                         Vector2 vel = _ship.Velocity * m - _ship.Facing * 5.1f;
-                        vel.X += Dice.Next() * 0.6f - 0.3f;
-                        vel.Y += Dice.Next() * 0.6f - 0.3f;
-
-                        _exhaustParticles.CreateParticle(_ship.Position, vel, Color.Yellow, 50);
+                        vel.X += Dice.Next() * 1.6f - 0.8f;
+                        vel.Y += Dice.Next() * 1.6f - 0.8f;
+                        _exhaustParticles.CreateParticle(_ship.Position, vel, 50);
                     }
                     break;
                 case Keys.Left:
@@ -90,7 +90,12 @@ namespace LitePlanet
 
             Renderer.DrawDepth = 0.5f;
             foreach (Particle p in _exhaustParticles.Particles)
-                Renderer.DrawSprite(_particleTexture, new RectangleF(p.Position.X, p.Position.Y, 0.1f, 0.1f), 0);
+            {
+                float particleSize = 0.25f * (p.Life / 50f); // p.Life / 100f * 0.4f; // 0.2f;
+                float alpha = (float)p.Life * p.Life / (50 * 50);
+                Color color = new Color(1, 1, (float)p.Life / 60f);
+                Renderer.DrawSprite(_particleTexture, new RectangleF(p.Position.X, p.Position.Y, particleSize, particleSize), 0, color, alpha);
+            }
 
             Renderer.DrawSprite(_particleTexture, new RectangleF(0,0,10,10), 0);
             Renderer.EndDraw();

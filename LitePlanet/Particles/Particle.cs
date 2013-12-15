@@ -12,7 +12,6 @@ namespace LitePlanet.Particles
     class Particle
     {
         Body _body;
-        public Color Color;
         public int Life;
 
         public Vector2 Position
@@ -39,7 +38,7 @@ namespace LitePlanet.Particles
         /// <param name="velocity">new velocity of the particle</param>
         /// <param name="color">color of the particle</param>
         /// <param name="life">lifetime of the particle, before it is removed from the world</param>
-        internal void Initialize(PhysicsCore physics, Vector2 position, Vector2 velocity, Color color, int life)
+        internal void Initialize(PhysicsCore physics, Vector2 position, Vector2 velocity, int life)
         {
             if (_body == null)
             {
@@ -51,16 +50,17 @@ namespace LitePlanet.Particles
             _body.BodyType = BodyType.Dynamic;
             _body.Mass = 0.01f;
             _body.Friction = 1f;
-            _body.Restitution = 1.2f;
+            _body.Restitution = 0.1f;
             _body.Position = position;
             _body.LinearVelocity = velocity;
+            _body.FixedRotation = true;
+            _body.LinearDamping = 0.1f;
             _body.CollisionCategories = Category.Cat2;
             _body.CollidesWith = Category.Cat1;
             
             //enable the particle in the physics system
             _body.Enabled = true;
             Life = life;
-            Color = color;
         }
 
         internal void Deinitialize()
