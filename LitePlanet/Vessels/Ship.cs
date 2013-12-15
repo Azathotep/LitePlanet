@@ -39,7 +39,10 @@ namespace LitePlanet.Vessels
 
         public Vector2 Velocity
         {
-            get { throw new NotImplementedException(); }
+            get 
+            {
+                return _body.LinearVelocity;
+            }
         }
 
         public Vector2 Facing

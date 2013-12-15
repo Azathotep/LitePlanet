@@ -36,6 +36,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Engine.cs" />
+    <Compile Include="Particles\Particle.cs" />
+    <Compile Include="Particles\ParticleList.cs" />
     <Compile Include="Vessels\Ship.cs" />
     <Compile Include="Worlds\Planet.cs" />
     <Compile Include="Program.cs" />

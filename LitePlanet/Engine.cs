@@ -8,12 +8,18 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using FarseerPhysics.Dynamics;
 using LiteEngine.Input;
+using LiteEngine.Core;
+using LiteEngine.Math;
 using LitePlanet.Worlds;
 using LitePlanet.Vessels;
+using LitePlanet.Particles;
+
 namespace LitePlanet
 {
     class Engine : LiteXnaEngine
     {
+        LiteEngine.Textures.Texture _particleTexture = new LiteEngine.Textures.Texture("grass");
+        ParticleList _exhaustParticles = new ParticleList(100);
         IShip _ship;
         IPlanet _planet;
 
@@ -35,6 +41,16 @@ namespace LitePlanet
                     break;
                 case Keys.Up:
                     _ship.ApplyForwardThrust(1f);
+                    
+                    float m = Math.Min((float)gameTime.ElapsedGameTime.TotalSeconds, (1f / 30f));
+                    for (int i = 0; i < 5; i++)
+                    {
+                        Vector2 vel = _ship.Velocity * m - _ship.Facing * 0.1f;
+                        vel.X += Dice.Next() * 0.01f - 0.005f;
+                        vel.Y += Dice.Next() * 0.01f - 0.005f;
+
+                        _exhaustParticles.AddParticle(new Particle(_ship.Position, vel, Color.Yellow, 50));
+                    }
                     break;
                 case Keys.Left:
                     _ship.ApplyRotateThrust(-0.1f);
@@ -49,14 +65,21 @@ namespace LitePlanet
 
         protected override void UpdateFrame(GameTime gameTime, XnaKeyboardHandler keyHandler)
         {
-            
+            _exhaustParticles.Update();
         }
 
         protected override void DrawFrame(GameTime gameTime)
         {
             Renderer.Clear(Color.Black);
             Renderer.BeginDraw();
+
+            Renderer.DrawDepth = 0.4f;
             _ship.Draw(Renderer);
+
+            Renderer.DrawDepth = 0.5f;
+            foreach (Particle p in _exhaustParticles.Particles)
+                Renderer.DrawSprite(_particleTexture, new RectangleF(p.Position.X, p.Position.Y, 0.1f, 0.1f), 0);
+
             Renderer.EndDraw();
         }
     }
