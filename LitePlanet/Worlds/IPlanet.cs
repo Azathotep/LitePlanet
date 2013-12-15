@@ -7,7 +7,7 @@ using LiteEngine.Math;
 
 namespace LitePlanet.Worlds
 {
-    interface IPlanet
+    public interface IPlanet
     {
         /// <summary>
         /// Converts coordinates from cartesian to polar world space

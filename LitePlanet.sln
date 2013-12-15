@@ -11,6 +11,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Referenced Projects", "Refe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Farseer Physics MonoGame", "LiteEngine\Farseer Physics Engine 3.5\Farseer Physics MonoGame.csproj", "{0AAD36E3-51A5-4A07-AB60-5C8A66BD38B7}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{C202F523-08E8-42AD-8A1C-090501A6FEF7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{2DB453D4-F938-4AF5-BA88-6E4058239D25}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +67,16 @@ Global
 		{0AAD36E3-51A5-4A07-AB60-5C8A66BD38B7}.Release|Mixed Platforms.Build.0 = Release|x86
 		{0AAD36E3-51A5-4A07-AB60-5C8A66BD38B7}.Release|x86.ActiveCfg = Release|x86
 		{0AAD36E3-51A5-4A07-AB60-5C8A66BD38B7}.Release|x86.Build.0 = Release|x86
+		{2DB453D4-F938-4AF5-BA88-6E4058239D25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DB453D4-F938-4AF5-BA88-6E4058239D25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2DB453D4-F938-4AF5-BA88-6E4058239D25}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{2DB453D4-F938-4AF5-BA88-6E4058239D25}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{2DB453D4-F938-4AF5-BA88-6E4058239D25}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2DB453D4-F938-4AF5-BA88-6E4058239D25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DB453D4-F938-4AF5-BA88-6E4058239D25}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2DB453D4-F938-4AF5-BA88-6E4058239D25}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{2DB453D4-F938-4AF5-BA88-6E4058239D25}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{2DB453D4-F938-4AF5-BA88-6E4058239D25}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -70,5 +84,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{7DE47032-A904-4C29-BD22-2D235E8D91BA} = {3CAA6F8A-B9C4-4EE6-A2CC-CC156C54B602}
 		{0AAD36E3-51A5-4A07-AB60-5C8A66BD38B7} = {3CAA6F8A-B9C4-4EE6-A2CC-CC156C54B602}
+		{2DB453D4-F938-4AF5-BA88-6E4058239D25} = {C202F523-08E8-42AD-8A1C-090501A6FEF7}
 	EndGlobalSection
 EndGlobal

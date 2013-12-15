@@ -5,7 +5,7 @@ using System.Text;
 
 namespace LitePlanet.Worlds
 {
-    interface ITile
+    public interface ITile
     {
     }
 }
