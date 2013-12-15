@@ -29,6 +29,13 @@ namespace LitePlanet
             Renderer.SetDeviceMode(800, 600, true);
             Renderer.Camera.SetViewField(80, 60);
             Renderer.Camera.LookAt(new Vector2(0, 0));
+
+            Body body = Physics.CreateRectangleBody(10f,10f,1f);
+            body.IsStatic = true;
+            body.Restitution = 0.5f;
+            body.Friction = 0.3f;
+            body.Rotation = 0;
+            body.Position = new Vector2(0, 0);
             base.Initialize();
         }
 
@@ -40,7 +47,7 @@ namespace LitePlanet
                     Exit();
                     break;
                 case Keys.Up:
-                    _ship.ApplyForwardThrust(1f);
+                    _ship.ApplyForwardThrust(2f);
                     
                     float m = Math.Min((float)gameTime.ElapsedGameTime.TotalSeconds, (1f / 30f));
                     for (int i = 0; i < 5; i++)
@@ -53,10 +60,10 @@ namespace LitePlanet
                     }
                     break;
                 case Keys.Left:
-                    _ship.ApplyRotateThrust(-0.1f);
+                    _ship.ApplyRotateThrust(-0.3f);
                     break;
                 case Keys.Right:
-                    _ship.ApplyRotateThrust(0.1f);
+                    _ship.ApplyRotateThrust(0.3f);
                     break;
             }
 
@@ -80,6 +87,12 @@ namespace LitePlanet
             foreach (Particle p in _exhaustParticles.Particles)
                 Renderer.DrawSprite(_particleTexture, new RectangleF(p.Position.X, p.Position.Y, 0.1f, 0.1f), 0);
 
+            Renderer.DrawSprite(_particleTexture, new RectangleF(0,0,10,10), 0);
+            Renderer.EndDraw();
+
+            Renderer.BeginDrawToScreen();
+            string frameRate = FrameRate + " FPS";
+            Renderer.DrawStringBox(frameRate, new RectangleF(10, 10, 120, 10), Color.White);
             Renderer.EndDraw();
         }
     }
