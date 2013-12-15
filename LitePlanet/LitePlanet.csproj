@@ -59,6 +59,10 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <ProjectReference Include="..\LiteEngine\Farseer Physics Engine 3.5\Farseer Physics MonoGame.csproj">
+      <Project>{0aad36e3-51a5-4a07-ab60-5c8a66bd38b7}</Project>
+      <Name>Farseer Physics MonoGame</Name>
+    </ProjectReference>
     <ProjectReference Include="..\LiteEngine\LiteEngine\LiteEngine.csproj">
       <Project>{35c84ce0-5661-4133-98ae-3448f07e93c3}</Project>
       <Name>LiteEngine</Name>

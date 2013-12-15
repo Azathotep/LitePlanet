@@ -6,18 +6,34 @@ using Microsoft.Xna.Framework;
 using LiteEngine.Rendering;
 using LiteEngine.Textures;
 using LiteEngine.Math;
+using FarseerPhysics.Common;
+using FarseerPhysics.Factories;
+using FarseerPhysics.Dynamics;
 
 namespace LitePlanet.Vessels
 {
     class Ship : IShip
     {
+        Body _body;
         Texture _texture = new Texture("rocketship");
+
+        public Ship(Engine engine)
+        {
+            _body = engine.Physics.CreateBody();
+            _body.BodyType = BodyType.Dynamic;
+            _body.AngularDamping = 0.5f;
+            _body.Friction = 1f;
+            _body.Restitution = 0f;
+            _body.Mass = 0.5f;
+            _body.Rotation = 0f;
+            FixtureFactory.AttachPolygon(new Vertices(new Vector2[] { new Vector2(0f, -0.4f), new Vector2(0.35f, 0.4f), new Vector2(-0.35f, 0.4f) }), 1f, _body);
+        }
 
         public Vector2 Position
         {
             get 
             {
-                return new Vector2(0, 0);
+                return _body.Position;
             }
         }
 
@@ -41,7 +57,7 @@ namespace LitePlanet.Vessels
 
         public void ApplyForwardThrust(float amount)
         {
-            throw new NotImplementedException();
+            _body.ApplyForce(new Vector2(0, 1f) * amount);
         }
 
         public void ApplyRotateThrust(float amount)

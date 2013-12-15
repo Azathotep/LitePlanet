@@ -10,9 +10,23 @@ namespace UnitTests
     public class PlanetTests
     {
         [TestMethod]
+        public void CreatePlanet()
+        {
+            IPlanet planet = new Planet(30);
+        }
+
+        [TestMethod]
         public void TestPolarToCartesian()
         {
-            IPlanet planet = new Planet();
+            IPlanet planet = new Planet(100);
+            Vector2 polar = planet.PolarToCaresian(new Vector2(0, 0));
+            Assert.AreEqual(new Vector2(0, 0), polar, "");
+        }
+
+        [TestMethod]
+        public void TestCartesianToPolar()
+        {
+            IPlanet planet = new Planet(100);
             Vector2 polar = planet.CartesianToPolar(new Vector2(0, 0));
             Assert.AreEqual(new Vector2(0, 0), polar, "");
         }
