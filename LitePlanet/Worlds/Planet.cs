@@ -9,6 +9,15 @@ namespace LitePlanet.Worlds
 {
     public class Planet : IPlanet
     {
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="radius">radius of planet in tiles</param>
+        public Planet(int radius)
+        {
+
+        }
+
         public Vector2 CartesianToPolar(Vector2 cCoords)
         {
             throw new NotImplementedException();
