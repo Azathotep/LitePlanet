@@ -18,7 +18,7 @@ namespace LitePlanet
 {
     class Engine : LiteXnaEngine
     {
-        LiteEngine.Textures.Texture _particleTexture = new LiteEngine.Textures.Texture("particle");
+        LiteEngine.Textures.Texture _grassTexture = new LiteEngine.Textures.Texture("grass");
         ParticlePool _exhaustParticles;
         ParticlePool _smokeParticles;
         IShip _ship;
@@ -37,7 +37,6 @@ namespace LitePlanet
 
             Body body = Physics.CreateRectangleBody(10f,10f,1f);
             body.IsStatic = true;
-
             body.Restitution = 0.3f;
             body.Friction = 1f;
             body.Rotation = 0;
@@ -98,7 +97,7 @@ namespace LitePlanet
                 float particleSize = 0.25f * (p.Life / 50f);
                 float alpha = (float)p.Life * p.Life / (50 * 50);
                 Color color = new Color(1, 1, (float)p.Life / 60f);
-                Renderer.DrawSprite(_particleTexture, new RectangleF(p.Position.X, p.Position.Y, particleSize, particleSize), 0, color, alpha);
+                p.Draw(Renderer, particleSize, color, alpha);
             }
 
             foreach (Particle p in _smokeParticles.Particles)
@@ -107,10 +106,10 @@ namespace LitePlanet
                 float alpha = (float)p.Life * p.Life / (50 * 50);
                 float c = (float)p.Life / 100;
                 Color color = new Color(c, c, c);
-                Renderer.DrawSprite(_particleTexture, new RectangleF(p.Position.X, p.Position.Y, particleSize, particleSize), 0, color, alpha);
+                p.Draw(Renderer, particleSize, color, alpha);
             }
 
-            Renderer.DrawSprite(_particleTexture, new RectangleF(0,0,10,10), 0);
+            Renderer.DrawSprite(_grassTexture, new RectangleF(0,0,10,10), 0);
             Renderer.EndDraw();
 
             Renderer.BeginDrawToScreen();
