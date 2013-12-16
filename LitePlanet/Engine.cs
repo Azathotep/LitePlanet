@@ -46,6 +46,14 @@ namespace LitePlanet
             base.Initialize();
         }
 
+        public ParticlePool SmokeParticles
+        {
+            get
+            {
+                return _smokeParticles;
+            }
+        }
+
         protected override int OnKeyPress(Keys key, GameTime gameTime)
         {
             switch (key)
@@ -117,6 +125,8 @@ namespace LitePlanet
             Renderer.DrawStringBox(frameRate, new RectangleF(10, 10, 120, 10), Color.White);
 
             Renderer.DrawStringBox("Fuel: " + _ship.Fuel, new RectangleF(10, 30, 120, 10), Color.White);
+
+            Renderer.DrawStringBox("Hull: " + _ship.Hull, new RectangleF(10, 50, 120, 10), Color.White);
             Renderer.EndDraw();
         }
     }
