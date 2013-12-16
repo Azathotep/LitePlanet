@@ -86,7 +86,7 @@ namespace LitePlanet.Vessels
         {
             get 
             {
-                return new Vector2((float)Math.Sin(Rotation), -(float)Math.Cos(Rotation));;
+                return _body.GetWorldVector(new Vector2(0, -1));
             }
         }
 
