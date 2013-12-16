@@ -7,6 +7,7 @@ using LiteEngine.Core;
 using LiteEngine.Rendering;
 using LiteEngine.Textures;
 using LiteEngine.Math;
+using LiteEngine.Physics;
 using FarseerPhysics.Common;
 using FarseerPhysics.Factories;
 using FarseerPhysics.Dynamics;
@@ -15,25 +16,24 @@ namespace LitePlanet.Vessels
 {
     class Ship : IShip
     {
-        Body _body;
+        PhysicsObject _object;
         Texture _texture = new Texture("rocketship");
         Engine _engine;
         public Ship(Engine engine)
         {
             _engine = engine;
-            _body = engine.Physics.CreateBody();
-            _body.BodyType = BodyType.Dynamic;
-            _body.AngularDamping = 0.5f;
-            _body.Friction = 1f;
-            _body.Restitution = 0f;
-            _body.Mass = 0.5f;
-            _body.Rotation = 0f;
-            _body.LinearVelocity = new Vector2(0, 5);
-            FixtureFactory.AttachPolygon(new Vertices(new Vector2[] { new Vector2(0f, -0.4f), new Vector2(0.35f, 0.4f), new Vector2(-0.35f, 0.4f) }), 1f, _body);
-            _body.CollisionCategories = Category.Cat2;
-            _body.CollidesWith = Category.Cat1;
-
-            engine.Physics.RegisterCollisionCallback(_body, OnCollision);
+            _object = engine.Physics.CreateBody();
+            _object.Body.BodyType = BodyType.Dynamic;
+            _object.Body.AngularDamping = 0.5f;
+            _object.Body.Friction = 1f;
+            _object.Body.Restitution = 0f;
+            _object.Body.Mass = 0.5f;
+            _object.Body.Rotation = 0f;
+            _object.Body.LinearVelocity = new Vector2(0, 5);
+            FixtureFactory.AttachPolygon(new Vertices(new Vector2[] { new Vector2(0f, -0.4f), new Vector2(0.35f, 0.4f), new Vector2(-0.35f, 0.4f) }), 1f, _object.Body);
+            _object.Body.CollisionCategories = Category.Cat2;
+            _object.Body.CollidesWith = Category.Cat1;
+            _object.SetCollisionCallback(OnCollision);
         }
 
         void OnCollision(float impulse)
@@ -57,7 +57,7 @@ namespace LitePlanet.Vessels
             }
         }
 
-        int _fuel = 500;
+        int _fuel = 2500;
         public int Fuel
         {
             get
@@ -70,7 +70,7 @@ namespace LitePlanet.Vessels
         {
             get 
             {
-                return _body.Position;
+                return _object.Body.Position;
             }
         }
 
@@ -78,7 +78,7 @@ namespace LitePlanet.Vessels
         {
             get 
             {
-                return _body.LinearVelocity;
+                return _object.Body.LinearVelocity;
             }
         }
 
@@ -86,7 +86,7 @@ namespace LitePlanet.Vessels
         {
             get 
             {
-                return _body.GetWorldVector(new Vector2(0, -1));
+                return _object.Body.GetWorldVector(new Vector2(0, -1));
             }
         }
 
@@ -94,7 +94,7 @@ namespace LitePlanet.Vessels
         {
             get 
             {
-                return _body.Rotation;
+                return _object.Body.Rotation;
             }
         }
 
@@ -103,12 +103,12 @@ namespace LitePlanet.Vessels
             if (_fuel <= 0)
                 return;
             _fuel--;
-            _body.ApplyForce(Facing * amount);
+            _object.Body.ApplyForce(Facing * amount);
         }
 
         public void ApplyRotateThrust(float amount)
         {
-            _body.ApplyTorque(amount);
+            _object.Body.ApplyTorque(amount);
         }
 
         public void Draw(XnaRenderer renderer)

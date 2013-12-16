@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using FarseerPhysics.Dynamics;
+using LiteEngine.Physics;
 using LiteEngine.Input;
 using LiteEngine.Core;
 using LiteEngine.Math;
@@ -21,28 +22,29 @@ namespace LitePlanet
         LiteEngine.Textures.Texture _grassTexture = new LiteEngine.Textures.Texture("grass");
         ParticlePool _exhaustParticles;
         ParticlePool _smokeParticles;
+        ParticlePool _bulletParticles;
         IShip _ship;
         IPlanet _planet;
 
         protected override void Initialize()
         {
-            Physics.SetGlobalGravity(new Vector2(0, 1));
-
+            Physics.SetGlobalGravity(new Vector2(0, 5));
             _exhaustParticles = ParticleSystem.CreateParticleFactory();
             _smokeParticles = ParticleSystem.CreateParticleFactory();
+            _bulletParticles = ParticleSystem.CreateParticleFactory();
             _ship = new Ship(this);
             Renderer.SetDeviceMode(800, 600, true);
             Renderer.Camera.SetViewField(80, 60);
             Renderer.Camera.LookAt(new Vector2(0, 0));
 
-            Body body = Physics.CreateRectangleBody(10f,10f,1f);
-            body.IsStatic = true;
-            body.Restitution = 0.3f;
-            body.Friction = 1f;
-            body.Rotation = 0;
-            body.Position = new Vector2(0, 0);
-            body.CollisionCategories = Category.Cat1;
-            body.CollidesWith = Category.All;
+            PhysicsObject obj = Physics.CreateRectangleBody(60f,30f,1f);
+            obj.Body.IsStatic = true;
+            obj.Body.Restitution = 0.3f;
+            obj.Body.Friction = 1f;
+            obj.Body.Rotation = 0;
+            obj.Body.Position = new Vector2(0, 40);
+            obj.Body.CollisionCategories = Category.Cat1;
+            obj.Body.CollidesWith = Category.All;
             base.Initialize();
         }
 
@@ -62,15 +64,15 @@ namespace LitePlanet
                     Exit();
                     break;
                 case Keys.Up:
-                    _ship.ApplyForwardThrust(2f);
+                    _ship.ApplyForwardThrust(3f);
                     if (_ship.Fuel > 0)
                     {
-                        for (int i = 0; i < 8; i++)
+                        for (int i = 0; i < 4; i++)
                         {
                             Vector2 vel = _ship.Velocity - _ship.Facing * 5.1f;
                             vel.X += Dice.Next() * 1.6f - 0.8f;
                             vel.Y += Dice.Next() * 1.6f - 0.8f;
-                            _exhaustParticles.CreateParticle(_ship.Position, vel, 50, true);
+                            Particle exhaust = _exhaustParticles.CreateParticle(_ship.Position, vel, 50, true);
                             Vector2 p = _ship.Position - _ship.Facing * 0.7f + Dice.RandomVector(0.3f);
                             _smokeParticles.CreateParticle(p, _ship.Velocity * 0, 50, false);
                         }
@@ -87,8 +89,30 @@ namespace LitePlanet
             return base.OnKeyPress(key, gameTime);
         }
 
+        float _fireAngle = (float)Math.PI / 3 * 2;
+        Vector2[] _turrets = new Vector2[] { new Vector2(-40, -20), new Vector2(40, -20) };
         protected override void UpdateFrame(GameTime gameTime, XnaKeyboardHandler keyHandler)
         {
+            foreach (Vector2 turret in _turrets)
+            {
+                if (Dice.Next(20) == 0)
+                {
+                    Vector2 diff = _ship.Position - turret;
+                    _fireAngle = (float)Math.Atan2(diff.X, -diff.Y);
+                    _fireAngle += Dice.Next() * 0.3f - 0.15f;
+                    Vector2 fireDir = new Vector2((float)Math.Sin(_fireAngle), -(float)Math.Cos(_fireAngle));
+                    Particle particle = _bulletParticles.CreateParticle(turret, fireDir * 50, 500, true);
+                    particle.Body.Mass = 0.01f;
+                    particle.Body.IsBullet = true;
+                    particle.Body.CollidesWith = Category.Cat1 | Category.Cat2;
+                    particle.Body.CollisionCategories = Category.Cat1;
+                    particle.SetCollisionCallback(new CollisionCallbackHandler((i) =>
+                        {
+                            particle.Life = 0;
+                            Particle np = SmokeParticles.CreateParticle(particle.Position, Vector2.Zero, 30, false);
+                        }));
+                }
+            }
         }
 
         protected override void DrawFrame(GameTime gameTime)
@@ -117,7 +141,15 @@ namespace LitePlanet
                 p.Draw(Renderer, particleSize, color, alpha);
             }
 
-            Renderer.DrawSprite(_grassTexture, new RectangleF(0,0,10,10), 0);
+            foreach (Particle p in _bulletParticles.Particles)
+            {
+                float particleSize = 0.4f;
+                float alpha = 0.6f;
+                Color color = Color.Cyan;
+                p.Draw(Renderer, particleSize, color, alpha);
+            }
+
+            Renderer.DrawSprite(_grassTexture, new RectangleF(0,40,60,30), 0);
             Renderer.EndDraw();
 
             Renderer.BeginDrawToScreen();
