@@ -12,6 +12,7 @@ namespace LitePlanet.Vessels
         Vector2 Position
         {
             get;
+            set;
         }
 
         Vector2 Velocity

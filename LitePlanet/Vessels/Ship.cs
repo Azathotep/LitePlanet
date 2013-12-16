@@ -8,6 +8,7 @@ using LiteEngine.Rendering;
 using LiteEngine.Textures;
 using LiteEngine.Math;
 using LiteEngine.Physics;
+using LitePlanet.Effects;
 using FarseerPhysics.Common;
 using FarseerPhysics.Factories;
 using FarseerPhysics.Dynamics;
@@ -43,8 +44,8 @@ namespace LitePlanet.Vessels
             {
                 _hull = 0;
                 _fuel = 0;
-                for (int i=0;i<40;i++)
-                    _engine.SmokeParticles.CreateParticle(Position + Dice.RandomVector(0.1f), Dice.RandomVector(1), 80, true);
+                Explosion explosion = new Explosion(_engine);
+                explosion.Create(Position);
             }
         }
 
@@ -71,6 +72,10 @@ namespace LitePlanet.Vessels
             get 
             {
                 return _object.Body.Position;
+            }
+            set
+            {
+                _object.Body.Position = value;
             }
         }
 

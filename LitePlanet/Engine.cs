@@ -14,6 +14,7 @@ using LiteEngine.Math;
 using LiteEngine.Particles;
 using LitePlanet.Worlds;
 using LitePlanet.Vessels;
+using LitePlanet.Effects;
 
 namespace LitePlanet
 {
@@ -33,6 +34,7 @@ namespace LitePlanet
             _smokeParticles = ParticleSystem.CreateParticleFactory();
             _bulletParticles = ParticleSystem.CreateParticleFactory();
             _ship = new Ship(this);
+            _ship.Position = new Vector2(0, 20);
             Renderer.SetDeviceMode(800, 600, true);
             Renderer.Camera.SetViewField(80, 60);
             Renderer.Camera.LookAt(new Vector2(0, 0));
@@ -64,7 +66,7 @@ namespace LitePlanet
                     Exit();
                     break;
                 case Keys.Up:
-                    _ship.ApplyForwardThrust(3f);
+                    _ship.ApplyForwardThrust(6f);
                     if (_ship.Fuel > 0)
                     {
                         for (int i = 0; i < 4; i++)
@@ -95,7 +97,7 @@ namespace LitePlanet
         {
             foreach (Vector2 turret in _turrets)
             {
-                if (Dice.Next(20) == 0)
+                if (Dice.Next(200) == 0)
                 {
                     Vector2 diff = _ship.Position - turret;
                     _fireAngle = (float)Math.Atan2(diff.X, -diff.Y);
@@ -109,6 +111,8 @@ namespace LitePlanet
                     particle.SetCollisionCallback(new CollisionCallbackHandler((i) =>
                         {
                             particle.Life = 0;
+                            Explosion explosion = new Explosion(this);
+                            explosion.Create(particle.Position);
                             Particle np = SmokeParticles.CreateParticle(particle.Position, Vector2.Zero, 30, false);
                         }));
                 }
