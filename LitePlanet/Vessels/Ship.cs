@@ -39,7 +39,7 @@ namespace LitePlanet.Vessels
 
         void OnCollision(float impulse)
         {
-            _hull -= (int)Math.Pow(impulse*4, 2);
+            _hull -= (int)Math.Pow(impulse*2, 2);
             if (_hull < 0)
             {
                 _hull = 0;

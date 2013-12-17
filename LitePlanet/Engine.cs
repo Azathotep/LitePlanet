@@ -12,6 +12,7 @@ using LiteEngine.Input;
 using LiteEngine.Core;
 using LiteEngine.Math;
 using LiteEngine.Particles;
+using LiteEngine.Rendering;
 using LitePlanet.Worlds;
 using LitePlanet.Vessels;
 using LitePlanet.Effects;
@@ -29,14 +30,14 @@ namespace LitePlanet
 
         protected override void Initialize()
         {
-            Physics.SetGlobalGravity(new Vector2(0, 5));
+            Physics.SetGlobalGravity(new Vector2(0, 15));
             _exhaustParticles = ParticleSystem.CreateParticleFactory();
             _smokeParticles = ParticleSystem.CreateParticleFactory();
             _bulletParticles = ParticleSystem.CreateParticleFactory();
             _ship = new Ship(this);
             _ship.Position = new Vector2(0, 20);
             Renderer.SetDeviceMode(800, 600, true);
-            Renderer.Camera.SetViewField(80, 60);
+            Renderer.Camera.SetAspect(80, 60);
             Renderer.Camera.LookAt(new Vector2(0, 0));
 
             PhysicsObject obj = Physics.CreateRectangleBody(60f,30f,1f);
@@ -47,8 +48,13 @@ namespace LitePlanet
             obj.Body.Position = new Vector2(0, 40);
             obj.Body.CollisionCategories = Category.Cat1;
             obj.Body.CollidesWith = Category.All;
+            _dock = new Dock(this);
+            _dock.Position = new Vector2(10, 20);
+
             base.Initialize();
         }
+
+        Dock _dock;
 
         public ParticlePool SmokeParticles
         {
@@ -66,7 +72,7 @@ namespace LitePlanet
                     Exit();
                     break;
                 case Keys.Up:
-                    _ship.ApplyForwardThrust(6f);
+                    _ship.ApplyForwardThrust(16f);
                     if (_ship.Fuel > 0)
                     {
                         for (int i = 0; i < 4; i++)
@@ -80,11 +86,17 @@ namespace LitePlanet
                         }
                     }
                     break;
+                case Keys.L:
+                    _ship.ApplyForwardThrust(-0.001f);
+                    break;
                 case Keys.Left:
                     _ship.ApplyRotateThrust(-0.1f);
                     break;
                 case Keys.Right:
                     _ship.ApplyRotateThrust(0.1f);
+                    break;
+                case Keys.N:
+                    Renderer.Camera.ChangeZoom(Renderer.Camera.Zoom + 0.05f);
                     break;
             }
 
@@ -95,6 +107,9 @@ namespace LitePlanet
         Vector2[] _turrets = new Vector2[] { new Vector2(-40, -20), new Vector2(40, -20) };
         protected override void UpdateFrame(GameTime gameTime, XnaKeyboardHandler keyHandler)
         {
+            _dock.Update();
+                    
+
             foreach (Vector2 turret in _turrets)
             {
                 if (Dice.Next(200) == 0)
@@ -154,6 +169,15 @@ namespace LitePlanet
             }
 
             Renderer.DrawSprite(_grassTexture, new RectangleF(0,40,60,30), 0);
+
+            if (Renderer.Camera.Zoom > 3)
+            {
+
+                float width = Renderer.Camera.Zoom;
+                Renderer.DrawSprite(_grassTexture, new RectangleF(_ship.Position.X, _ship.Position.Y, width, width), 0, 0.2f);
+            }
+
+            _dock.Draw(Renderer);
             Renderer.EndDraw();
 
             Renderer.BeginDrawToScreen();
@@ -164,6 +188,43 @@ namespace LitePlanet
 
             Renderer.DrawStringBox("Hull: " + _ship.Hull, new RectangleF(10, 50, 120, 10), Color.White);
             Renderer.EndDraw();
+        }
+    }
+
+    class Dock
+    {
+        static LiteEngine.Textures.Texture _texture = new LiteEngine.Textures.Texture("grass");
+        PhysicsObject _object;
+
+        public Dock(Engine engine)
+        {
+            _object = engine.Physics.CreateRectangleBody(3, 1, 1);
+            _object.Body.IsStatic = true;
+        }
+
+        public void Update()
+        {
+            float delta = -0.03f;
+            //if (Position.Y > 30)
+            //    delta *= -1;
+            Position = new Vector2(Position.X, Position.Y + delta);
+        }
+
+        public Vector2 Position
+        {
+            get
+            {
+                return _object.Body.Position;
+            }
+            set
+            {
+                _object.Body.Position = value;
+            }
+        }
+
+        public void Draw(XnaRenderer renderer)
+        {
+            renderer.DrawSprite(_texture, new RectangleF(Position.X, Position.Y, 3, 1), 0);
         }
     }
 }
