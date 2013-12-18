@@ -22,6 +22,8 @@ namespace LitePlanet
     class Engine : LiteXnaEngine
     {
         LiteEngine.Textures.Texture _grassTexture = new LiteEngine.Textures.Texture("grass");
+        LiteEngine.Textures.Texture _circleTexture = new LiteEngine.Textures.Texture("circleOverlay");
+        
         ParticlePool _exhaustParticles;
         ParticlePool _smokeParticles;
         ParticlePool _bulletParticles;
@@ -96,7 +98,7 @@ namespace LitePlanet
                     _ship.ApplyRotateThrust(0.1f);
                     break;
                 case Keys.N:
-                    Renderer.Camera.ChangeZoom(Renderer.Camera.Zoom + 0.05f);
+                    Renderer.Camera.ChangeZoom(Renderer.Camera.Zoom * 1.01f);
                     break;
             }
 
@@ -172,9 +174,13 @@ namespace LitePlanet
 
             if (Renderer.Camera.Zoom > 3)
             {
-
                 float width = Renderer.Camera.Zoom;
-                Renderer.DrawSprite(_grassTexture, new RectangleF(_ship.Position.X, _ship.Position.Y, width, width), 0, 0.2f);
+
+                Color c = Color.FromNonPremultiplied(0, 255, 0, 255);
+                Renderer.DrawSprite(_circleTexture, new RectangleF(_ship.Position.X, _ship.Position.Y, width, width), 0, c, 1f);
+
+                Vector2 front = _ship.Position + _ship.Facing * 2;
+                Renderer.DrawSprite(_circleTexture, new RectangleF(front.X, front.Y, width*0.4f, width*2), _ship.Rotation, c, 1f);
             }
 
             _dock.Draw(Renderer);
