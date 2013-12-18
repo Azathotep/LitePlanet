@@ -27,12 +27,12 @@ namespace LitePlanet
         ParticlePool _exhaustParticles;
         ParticlePool _smokeParticles;
         ParticlePool _bulletParticles;
-        IShip _ship;
+        Ship _ship;
         IPlanet _planet;
 
         protected override void Initialize()
         {
-            Physics.SetGlobalGravity(new Vector2(0, 15));
+            Physics.SetGlobalGravity(new Vector2(0, 1));
             _exhaustParticles = ParticleSystem.CreateParticleFactory();
             _smokeParticles = ParticleSystem.CreateParticleFactory();
             _bulletParticles = ParticleSystem.CreateParticleFactory();
@@ -52,7 +52,6 @@ namespace LitePlanet
             obj.Body.CollidesWith = Category.All;
             _dock = new Dock(this);
             _dock.Position = new Vector2(10, 20);
-
             base.Initialize();
         }
 
@@ -63,6 +62,14 @@ namespace LitePlanet
             get
             {
                 return _smokeParticles;
+            }
+        }
+
+        public ParticlePool BulletParticles
+        {
+            get
+            {
+                return _bulletParticles;
             }
         }
 
@@ -100,40 +107,18 @@ namespace LitePlanet
                 case Keys.N:
                     Renderer.Camera.ChangeZoom(Renderer.Camera.Zoom * 1.01f);
                     break;
+                case Keys.Space:
+                    _ship.PrimaryWeapon.Fire(this, _ship.Position, _ship.Facing);
+                    break;
             }
 
             return base.OnKeyPress(key, gameTime);
         }
 
         float _fireAngle = (float)Math.PI / 3 * 2;
-        Vector2[] _turrets = new Vector2[] { new Vector2(-40, -20), new Vector2(40, -20) };
         protected override void UpdateFrame(GameTime gameTime, XnaKeyboardHandler keyHandler)
         {
             _dock.Update();
-                    
-
-            foreach (Vector2 turret in _turrets)
-            {
-                if (Dice.Next(200) == 0)
-                {
-                    Vector2 diff = _ship.Position - turret;
-                    _fireAngle = (float)Math.Atan2(diff.X, -diff.Y);
-                    _fireAngle += Dice.Next() * 0.3f - 0.15f;
-                    Vector2 fireDir = new Vector2((float)Math.Sin(_fireAngle), -(float)Math.Cos(_fireAngle));
-                    Particle particle = _bulletParticles.CreateParticle(turret, fireDir * 50, 500, true);
-                    particle.Body.Mass = 0.01f;
-                    particle.Body.IsBullet = true;
-                    particle.Body.CollidesWith = Category.Cat1 | Category.Cat2;
-                    particle.Body.CollisionCategories = Category.Cat1;
-                    particle.SetCollisionCallback(new CollisionCallbackHandler((i) =>
-                        {
-                            particle.Life = 0;
-                            Explosion explosion = new Explosion(this);
-                            explosion.Create(particle.Position);
-                            Particle np = SmokeParticles.CreateParticle(particle.Position, Vector2.Zero, 30, false);
-                        }));
-                }
-            }
         }
 
         protected override void DrawFrame(GameTime gameTime)
@@ -164,9 +149,9 @@ namespace LitePlanet
 
             foreach (Particle p in _bulletParticles.Particles)
             {
-                float particleSize = 0.4f;
-                float alpha = 0.6f;
-                Color color = Color.Cyan;
+                float particleSize = 0.2f;
+                float alpha = 1f;
+                Color color = Color.Yellow;
                 p.Draw(Renderer, particleSize, color, alpha);
             }
 

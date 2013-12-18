@@ -8,15 +8,17 @@ using LiteEngine.Rendering;
 using LiteEngine.Textures;
 using LiteEngine.Math;
 using LiteEngine.Physics;
-using LitePlanet.Effects;
 using FarseerPhysics.Common;
 using FarseerPhysics.Factories;
 using FarseerPhysics.Dynamics;
+using LitePlanet.Effects;
+using LitePlanet.Weapons;
 
 namespace LitePlanet.Vessels
 {
-    class Ship : IShip
+    class Ship
     {
+        Cannon _cannon;
         PhysicsObject _object;
         Texture _texture = new Texture("rocketship");
         Engine _engine;
@@ -35,6 +37,15 @@ namespace LitePlanet.Vessels
             _object.Body.CollisionCategories = Category.Cat2;
             _object.Body.CollidesWith = Category.Cat1;
             _object.SetCollisionCallback(OnCollision);
+            _cannon = new Cannon();
+        }
+
+        public Cannon PrimaryWeapon
+        {
+            get
+            {
+                return _cannon;
+            }
         }
 
         void OnCollision(float impulse)
