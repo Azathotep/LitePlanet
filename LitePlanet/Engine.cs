@@ -28,6 +28,7 @@ namespace LitePlanet
         ParticlePool _smokeParticles;
         ParticlePool _bulletParticles;
         Ship _ship;
+        Ship _aiShip;
         IPlanet _planet;
 
         protected override void Initialize()
@@ -38,18 +39,21 @@ namespace LitePlanet
             _bulletParticles = ParticleSystem.CreateParticleFactory();
             _ship = new Ship(this);
             _ship.Position = new Vector2(0, 20);
+
+            _aiShip = new Ship(this, true);
+            _aiShip.Position = new Vector2(10, 20);
             Renderer.SetDeviceMode(800, 600, true);
             Renderer.Camera.SetAspect(80, 60);
             Renderer.Camera.LookAt(new Vector2(0, 0));
 
-            PhysicsObject obj = Physics.CreateRectangleBody(60f,30f,1f);
-            obj.Body.IsStatic = true;
-            obj.Body.Restitution = 0.3f;
-            obj.Body.Friction = 1f;
-            obj.Body.Rotation = 0;
-            obj.Body.Position = new Vector2(0, 40);
-            obj.Body.CollisionCategories = Category.Cat1;
-            obj.Body.CollidesWith = Category.All;
+            Body body = Physics.CreateRectangleBody(null, 60f,30f,1f);
+            body.IsStatic = true;
+            body.Restitution = 0.3f;
+            body.Friction = 1f;
+            body.Rotation = 0;
+            body.Position = new Vector2(0, 40);
+            body.CollisionCategories = Category.Cat1;
+            body.CollidesWith = Category.All;
             _dock = new Dock(this);
             _dock.Position = new Vector2(10, 20);
             base.Initialize();
@@ -108,7 +112,7 @@ namespace LitePlanet
                     Renderer.Camera.ChangeZoom(Renderer.Camera.Zoom * 1.01f);
                     break;
                 case Keys.Space:
-                    _ship.PrimaryWeapon.Fire(this, _ship.Position, _ship.Facing);
+                    _ship.PrimaryWeapon.Fire(this, _ship, _ship.Position, _ship.Facing);
                     break;
             }
 
@@ -128,6 +132,8 @@ namespace LitePlanet
 
             Renderer.DrawDepth = 0.4f;
             _ship.Draw(Renderer);
+
+            _aiShip.Draw(Renderer);
 
             Renderer.DrawDepth = 0.5f;
             foreach (Particle p in _exhaustParticles.Particles)
@@ -185,12 +191,12 @@ namespace LitePlanet
     class Dock
     {
         static LiteEngine.Textures.Texture _texture = new LiteEngine.Textures.Texture("grass");
-        PhysicsObject _object;
+        Body _body;
 
         public Dock(Engine engine)
         {
-            _object = engine.Physics.CreateRectangleBody(3, 1, 1);
-            _object.Body.IsStatic = true;
+            _body = engine.Physics.CreateRectangleBody(null, 3, 1, 1);
+            _body.IsStatic = true;
         }
 
         public void Update()
@@ -205,11 +211,11 @@ namespace LitePlanet
         {
             get
             {
-                return _object.Body.Position;
+                return _body.Position;
             }
             set
             {
-                _object.Body.Position = value;
+                _body.Position = value;
             }
         }
 

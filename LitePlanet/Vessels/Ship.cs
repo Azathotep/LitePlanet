@@ -16,28 +16,37 @@ using LitePlanet.Weapons;
 
 namespace LitePlanet.Vessels
 {
-    class Ship
+    class Ship : IPhysicsObject
     {
         Cannon _cannon;
-        PhysicsObject _object;
+        Body _body;
         Texture _texture = new Texture("rocketship");
         Engine _engine;
-        public Ship(Engine engine)
+        public Ship(Engine engine, bool other=false)
         {
             _engine = engine;
-            _object = engine.Physics.CreateBody();
-            _object.Body.BodyType = BodyType.Dynamic;
-            _object.Body.AngularDamping = 0.5f;
-            _object.Body.Friction = 1f;
-            _object.Body.Restitution = 0f;
-            _object.Body.Mass = 0.5f;
-            _object.Body.Rotation = 0f;
-            _object.Body.LinearVelocity = new Vector2(0, 5);
-            FixtureFactory.AttachPolygon(new Vertices(new Vector2[] { new Vector2(0f, -0.4f), new Vector2(0.35f, 0.4f), new Vector2(-0.35f, 0.4f) }), 1f, _object.Body);
-            _object.Body.CollisionCategories = Category.Cat2;
-            _object.Body.CollidesWith = Category.Cat1;
-            _object.SetCollisionCallback(OnCollision);
+            _body = engine.Physics.CreateBody(this);
+            _body.BodyType = BodyType.Dynamic;
+            _body.AngularDamping = 0.5f;
+            _body.Friction = 1f;
+            _body.Restitution = 0f;
+            _body.Mass = 0.5f;
+            _body.Rotation = 0f;
+            _body.LinearVelocity = new Vector2(0, 5);
+            FixtureFactory.AttachPolygon(new Vertices(new Vector2[] { new Vector2(0f, -0.4f), new Vector2(0.35f, 0.4f), new Vector2(-0.35f, 0.4f) }), 1f, _body);
+
+            _body.CollisionCategories = Category.Cat2;
+            _body.CollidesWith = Category.Cat1 | Category.Cat2;
+            
             _cannon = new Cannon();
+        }
+
+        public Body Body
+        {
+            get
+            {
+                return _body;
+            }
         }
 
         public Cannon PrimaryWeapon
@@ -48,17 +57,6 @@ namespace LitePlanet.Vessels
             }
         }
 
-        void OnCollision(float impulse)
-        {
-            _hull -= (int)Math.Pow(impulse*2, 2);
-            if (_hull < 0)
-            {
-                _hull = 0;
-                _fuel = 0;
-                Explosion explosion = new Explosion(_engine);
-                explosion.Create(Position);
-            }
-        }
 
         int _hull = 100;
         public int Hull
@@ -82,11 +80,11 @@ namespace LitePlanet.Vessels
         {
             get 
             {
-                return _object.Body.Position;
+                return _body.Position;
             }
             set
             {
-                _object.Body.Position = value;
+                _body.Position = value;
             }
         }
 
@@ -94,7 +92,7 @@ namespace LitePlanet.Vessels
         {
             get 
             {
-                return _object.Body.LinearVelocity;
+                return _body.LinearVelocity;
             }
         }
 
@@ -102,7 +100,7 @@ namespace LitePlanet.Vessels
         {
             get 
             {
-                return _object.Body.GetWorldVector(new Vector2(0, -1));
+                return _body.GetWorldVector(new Vector2(0, -1));
             }
         }
 
@@ -110,7 +108,7 @@ namespace LitePlanet.Vessels
         {
             get 
             {
-                return _object.Body.Rotation;
+                return _body.Rotation;
             }
         }
 
@@ -119,12 +117,12 @@ namespace LitePlanet.Vessels
             if (_fuel <= 0)
                 return;
             _fuel--;
-            _object.Body.ApplyForce(Facing * amount);
+            _body.ApplyForce(Facing * amount);
         }
 
         public void ApplyRotateThrust(float amount)
         {
-            _object.Body.ApplyTorque(amount);
+            _body.ApplyTorque(amount);
         }
 
         public void Draw(XnaRenderer renderer)
@@ -132,6 +130,18 @@ namespace LitePlanet.Vessels
             if (_hull <= 0)
                 return;
             renderer.DrawSprite(_texture, new RectangleF(Position.X, Position.Y, 1f, 1f), Rotation);
+        }
+
+        public void OnCollideWith(IPhysicsObject self, IPhysicsObject other, float impulse)
+        {
+            _hull -= (int)Math.Pow(impulse * 2, 2);
+            if (_hull < 0)
+            {
+                _hull = 0;
+                _fuel = 0;
+                Explosion explosion = new Explosion(_engine);
+                explosion.Create(Position);
+            }
         }
     }
 }
