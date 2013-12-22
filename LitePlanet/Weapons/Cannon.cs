@@ -21,8 +21,8 @@ namespace LitePlanet.Weapons
             _recharge++;
             if (_recharge < 10)
                 return;
-            Particle particle = engine.Bullets.CreateBullet(position, direction * 50);
-            particle.Body.IgnoreCollisionWith(firer.Body);
+            Particle particle = engine.Bullets.CreateBullet(position - direction * 10, direction * 50);
+            //particle.Body.IgnoreCollisionWith(firer.Body);
             _recharge = 0;
         }
     }

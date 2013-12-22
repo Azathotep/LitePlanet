@@ -13,10 +13,11 @@ using FarseerPhysics.Factories;
 using FarseerPhysics.Dynamics;
 using LitePlanet.Effects;
 using LitePlanet.Weapons;
+using LitePlanet.Projectiles;
 
 namespace LitePlanet.Vessels
 {
-    class Ship : IPhysicsObject
+    class Ship : IPhysicsObject, IDamageSink
     {
         Cannon _cannon;
         Body _body;
@@ -134,7 +135,12 @@ namespace LitePlanet.Vessels
 
         public void OnCollideWith(IPhysicsObject self, IPhysicsObject other, float impulse)
         {
-            _hull -= (int)Math.Pow(impulse * 2, 2);
+            TakeDamage((int)Math.Pow(impulse * 2, 2));
+        }
+
+        public void TakeDamage(int damageAmount)
+        {
+            _hull -= damageAmount;
             if (_hull < 0)
             {
                 _hull = 0;

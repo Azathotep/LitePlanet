@@ -18,7 +18,7 @@ namespace LitePlanet.Effects
         internal void Create(Microsoft.Xna.Framework.Vector2 Position)
         {
             for (int i = 0; i < 30; i++)
-                _engine.SmokeParticles.CreateParticle(Position + Dice.RandomVector(0.1f), Dice.RandomVector(2), 50, false);
+                _engine.SmokeParticles.CreateParticle(Position + Dice.RandomVector(0.1f), Dice.RandomVector(2), 50);
         }
     }
 }

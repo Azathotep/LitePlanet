@@ -22,9 +22,7 @@ namespace LitePlanet.Projectiles
 
         public Particle CreateBullet(Vector2 position, Vector2 velocity)
         {
-            Particle particle = _pool.CreateParticle(position, velocity, 30, false);
-            particle.Body.Mass = 0.01f;
-            particle.Body.IsBullet = true;
+            Particle particle = _pool.CreateParticle(position, velocity, 30);
             particle.Body.CollidesWith = Category.Cat1 | Category.Cat2;
             particle.Body.CollisionCategories = Category.Cat2;
             particle.OnCollideWithOther += particle_OnCollideWithOther;
@@ -36,7 +34,10 @@ namespace LitePlanet.Projectiles
             particle.Life = 0;
             Explosion explosion = new Explosion(_engine);
             explosion.Create(particle.Position);
-            Particle np = _engine.SmokeParticles.CreateParticle(particle.Position, Vector2.Zero, 30, false);
+            Particle np = _engine.SmokeParticles.CreateParticle(particle.Position, Vector2.Zero, 30);
+            IDamageSink damageSink = other as IDamageSink;
+            if (damageSink != null)
+                damageSink.TakeDamage(0);
         }
 
         public IEnumerable<Particle> Particles 

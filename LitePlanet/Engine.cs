@@ -95,9 +95,10 @@ namespace LitePlanet
                             Vector2 vel = _ship.Velocity - _ship.Facing * 5.1f;
                             vel.X += Dice.Next() * 1.6f - 0.8f;
                             vel.Y += Dice.Next() * 1.6f - 0.8f;
-                            Particle exhaust = _exhaustParticles.CreateParticle(_ship.Position, vel, 50, true);
+                            Particle exhaust = _exhaustParticles.CreateParticle(_ship.Position, vel, 50);
+
                             Vector2 p = _ship.Position - _ship.Facing * 0.7f + Dice.RandomVector(0.3f);
-                            _smokeParticles.CreateParticle(p, _ship.Velocity * 0, 50, false);
+                            _smokeParticles.CreateParticle(p, _ship.Velocity * 0, 50);
                         }
                     }
                     break;

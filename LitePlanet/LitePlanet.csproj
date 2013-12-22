@@ -38,6 +38,7 @@
     <Compile Include="Effects\Explosion.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="Projectiles\Bullets.cs" />
+    <Compile Include="Projectiles\IDamageSink.cs" />
     <Compile Include="Vessels\Ship.cs" />
     <Compile Include="Weapons\Cannon.cs" />
     <Compile Include="Worlds\Planet.cs" />
