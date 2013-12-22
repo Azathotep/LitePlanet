@@ -52,7 +52,7 @@ namespace LitePlanet
             Renderer.Camera.SetAspect(80, 60);
             Renderer.Camera.LookAt(new Vector2(0, 0));
 
-            Body body = Physics.CreateRectangleBody(null, 60f,30f,1f);
+            Body body = Physics.CreateRectangleBody(null, 200f,30f,1f);
             body.IsStatic = true;
             body.Restitution = 0.3f;
             body.Friction = 1f;
@@ -60,12 +60,8 @@ namespace LitePlanet
             body.Position = new Vector2(0, 40);
             body.CollisionCategories = Category.Cat1;
             body.CollidesWith = Category.All;
-            _dock = new Dock(this);
-            _dock.Position = new Vector2(10, 20);
             base.Initialize();
         }
-
-        Dock _dock;
 
         public ParticlePool SmokeParticles
         {
@@ -124,7 +120,6 @@ namespace LitePlanet
         protected override void UpdateFrame(GameTime gameTime, XnaKeyboardHandler keyHandler)
         {
             _pilot.GoTo(_ship.Position);
-            _dock.Update();
         }
 
         protected override void DrawFrame(GameTime gameTime)
@@ -163,7 +158,7 @@ namespace LitePlanet
                 p.Draw(Renderer, particleSize, color, alpha);
             }
 
-            Renderer.DrawSprite(_grassTexture, new RectangleF(0,40,60,30), 0);
+            Renderer.DrawSprite(_grassTexture, new RectangleF(0,40,200,30), 0);
 
             if (Renderer.Camera.Zoom > 3)
             {
@@ -176,7 +171,6 @@ namespace LitePlanet
                 Renderer.DrawSprite(_circleTexture, new RectangleF(front.X, front.Y, width*0.4f, width*2), _ship.Rotation, c, 1f);
             }
 
-            _dock.Draw(Renderer);
             Renderer.EndDraw();
 
             Renderer.BeginDrawToScreen();

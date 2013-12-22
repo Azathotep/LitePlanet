@@ -40,6 +40,9 @@ namespace LitePlanet.Vessels
             _body.CollidesWith = Category.Cat1 | Category.Cat2;
             
             _cannon = new Cannon();
+
+            if (other)
+                _texture = new Texture("redship");
         }
 
         public Body Body
