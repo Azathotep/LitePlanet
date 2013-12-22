@@ -34,10 +34,9 @@ namespace LitePlanet.Projectiles
             particle.Life = 0;
             Explosion explosion = new Explosion(_engine);
             explosion.Create(particle.Position);
-            Particle np = _engine.SmokeParticles.CreateParticle(particle.Position, Vector2.Zero, 30);
             IDamageSink damageSink = other as IDamageSink;
             if (damageSink != null)
-                damageSink.TakeDamage(0);
+                damageSink.TakeDamage(20);
         }
 
         public IEnumerable<Particle> Particles 
