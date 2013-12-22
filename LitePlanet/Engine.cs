@@ -16,17 +16,19 @@ using LiteEngine.Rendering;
 using LitePlanet.Worlds;
 using LitePlanet.Vessels;
 using LitePlanet.Effects;
+using LitePlanet.Weapons;
+using LitePlanet.Projectiles;
 
 namespace LitePlanet
 {
-    class Engine : LiteXnaEngine
+    public class Engine : LiteXnaEngine
     {
         LiteEngine.Textures.Texture _grassTexture = new LiteEngine.Textures.Texture("grass");
         LiteEngine.Textures.Texture _circleTexture = new LiteEngine.Textures.Texture("circleOverlay");
         
         ParticlePool _exhaustParticles;
         ParticlePool _smokeParticles;
-        ParticlePool _bulletParticles;
+        Bullets _bullets;
         Ship _ship;
         Ship _aiShip;
         IPlanet _planet;
@@ -36,7 +38,7 @@ namespace LitePlanet
             Physics.SetGlobalGravity(new Vector2(0, 1));
             _exhaustParticles = ParticleSystem.CreateParticleFactory();
             _smokeParticles = ParticleSystem.CreateParticleFactory();
-            _bulletParticles = ParticleSystem.CreateParticleFactory();
+            _bullets = new Bullets(this);
             _ship = new Ship(this);
             _ship.Position = new Vector2(0, 20);
 
@@ -69,11 +71,11 @@ namespace LitePlanet
             }
         }
 
-        public ParticlePool BulletParticles
+        public Bullets Bullets
         {
             get
             {
-                return _bulletParticles;
+                return _bullets;
             }
         }
 
@@ -153,7 +155,7 @@ namespace LitePlanet
                 p.Draw(Renderer, particleSize, color, alpha);
             }
 
-            foreach (Particle p in _bulletParticles.Particles)
+            foreach (Particle p in _bullets.Particles)
             {
                 float particleSize = 0.2f;
                 float alpha = 1f;
