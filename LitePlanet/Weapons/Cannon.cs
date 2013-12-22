@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using FarseerPhysics.Dynamics;
 using LiteEngine.Physics;
 using LiteEngine.Particles;
+using LiteEngine.Core;
 using LitePlanet.Effects;
 using LitePlanet.Vessels;
 
@@ -19,9 +20,10 @@ namespace LitePlanet.Weapons
         {
             _engine = engine;
             _recharge++;
-            if (_recharge < 10)
+            if (_recharge < 3)
                 return;
-            Particle particle = engine.Bullets.CreateBullet(position, direction * 50);
+            position += Dice.RandomVector(0.05f);
+            Particle particle = engine.Bullets.CreateBullet(position, direction * 150);
             particle.Body.IgnoreCollisionWith(firer.Body);
             _recharge = 0;
         }

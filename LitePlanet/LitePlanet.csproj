@@ -35,6 +35,7 @@
     <ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AI\Pilot.cs" />
     <Compile Include="Effects\Explosion.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="Projectiles\Bullets.cs" />

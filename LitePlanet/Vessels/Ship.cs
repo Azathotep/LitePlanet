@@ -8,13 +8,13 @@ using LiteEngine.Rendering;
 using LiteEngine.Textures;
 using LiteEngine.Math;
 using LiteEngine.Physics;
+using LiteEngine.Particles;
 using FarseerPhysics.Common;
 using FarseerPhysics.Factories;
 using FarseerPhysics.Dynamics;
 using LitePlanet.Effects;
 using LitePlanet.Weapons;
 using LitePlanet.Projectiles;
-
 namespace LitePlanet.Vessels
 {
     class Ship : IPhysicsObject, IDamageSink
@@ -119,6 +119,18 @@ namespace LitePlanet.Vessels
                 return;
             _fuel--;
             _body.ApplyForce(Facing * amount);
+
+            for (int i = 0; i < 2; i++)
+            {
+                Vector2 vel = Velocity - Facing * 5.1f;
+                vel.X += Dice.Next() * 1.6f - 0.8f;
+                vel.Y += Dice.Next() * 1.6f - 0.8f;
+                Particle exhaust = _engine.ExhaustParticles.CreateParticle(Position, vel, 50);
+                exhaust.Body.CollidesWith = Category.Cat1;
+                exhaust.Body.CollisionCategories = Category.Cat6;
+                Vector2 p = Position - Facing * 0.7f + Dice.RandomVector(0.3f);
+                _engine.SmokeParticles.CreateParticle(p, Velocity * 0, 50);
+            }
         }
 
         public void ApplyRotateThrust(float amount)

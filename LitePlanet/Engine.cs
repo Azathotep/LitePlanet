@@ -18,6 +18,7 @@ using LitePlanet.Vessels;
 using LitePlanet.Effects;
 using LitePlanet.Weapons;
 using LitePlanet.Projectiles;
+using LitePlanet.AI;
 
 namespace LitePlanet
 {
@@ -32,10 +33,11 @@ namespace LitePlanet
         Ship _ship;
         Ship _aiShip;
         IPlanet _planet;
+        Pilot _pilot;
 
         protected override void Initialize()
         {
-            Physics.SetGlobalGravity(new Vector2(0, 1));
+            Physics.SetGlobalGravity(new Vector2(0, 0.1f));
             _exhaustParticles = ParticleSystem.CreateParticleFactory();
             _smokeParticles = ParticleSystem.CreateParticleFactory();
             _bullets = new Bullets(this);
@@ -43,7 +45,9 @@ namespace LitePlanet
             _ship.Position = new Vector2(0, 20);
 
             _aiShip = new Ship(this, true);
-            _aiShip.Position = new Vector2(10, 20);
+            _aiShip.Position = new Vector2(5, 0);
+            _aiShip.Body.Rotation = 1f;
+            _pilot = new Pilot(_aiShip);
             Renderer.SetDeviceMode(800, 600, true);
             Renderer.Camera.SetAspect(80, 60);
             Renderer.Camera.LookAt(new Vector2(0, 0));
@@ -71,6 +75,14 @@ namespace LitePlanet
             }
         }
 
+        public ParticlePool ExhaustParticles
+        {
+            get
+            {
+                return _exhaustParticles;
+            }
+        }
+
         public Bullets Bullets
         {
             get
@@ -88,19 +100,6 @@ namespace LitePlanet
                     break;
                 case Keys.Up:
                     _ship.ApplyForwardThrust(16f);
-                    if (_ship.Fuel > 0)
-                    {
-                        for (int i = 0; i < 4; i++)
-                        {
-                            Vector2 vel = _ship.Velocity - _ship.Facing * 5.1f;
-                            vel.X += Dice.Next() * 1.6f - 0.8f;
-                            vel.Y += Dice.Next() * 1.6f - 0.8f;
-                            Particle exhaust = _exhaustParticles.CreateParticle(_ship.Position, vel, 50);
-
-                            Vector2 p = _ship.Position - _ship.Facing * 0.7f + Dice.RandomVector(0.3f);
-                            _smokeParticles.CreateParticle(p, _ship.Velocity * 0, 50);
-                        }
-                    }
                     break;
                 case Keys.L:
                     _ship.ApplyForwardThrust(-0.001f);
@@ -122,9 +121,9 @@ namespace LitePlanet
             return base.OnKeyPress(key, gameTime);
         }
 
-        float _fireAngle = (float)Math.PI / 3 * 2;
         protected override void UpdateFrame(GameTime gameTime, XnaKeyboardHandler keyHandler)
         {
+            _pilot.GoTo(_ship.Position);
             _dock.Update();
         }
 
@@ -205,8 +204,6 @@ namespace LitePlanet
         public void Update()
         {
             float delta = -0.03f;
-            //if (Position.Y > 30)
-            //    delta *= -1;
             Position = new Vector2(Position.X, Position.Y + delta);
         }
 
