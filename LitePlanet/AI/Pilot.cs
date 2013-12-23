@@ -40,17 +40,15 @@ namespace LitePlanet.AI
 
         internal void GoTo(Vector2 destination)
         {
-            Vector2 v = destination - _ship.Position;
+            float dist = Vector2.Distance(destination, _ship.Position);
+            Vector2 v = destination - (_ship.Position + _ship.Velocity * (dist/10));
 
             float angle = (float)Math.Atan2(v.X, -v.Y);
 
             RotateToFace(angle);
 
-            if (Math.Abs(AngleBetween(_ship.Rotation, angle)) < 0.1f)
+            if (Math.Abs(AngleBetween(_ship.Rotation, angle)) < 0.8f)
                 _ship.ApplyForwardThrust(1f);
-
-            //if (_aiShip.Rotation < 0.1f || _aiShip.Rotation > Math.PI * 2 - 0.1f)
-            //    _aiShip.ApplyForwardThrust(1f);
         }
     }
 }

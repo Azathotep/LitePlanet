@@ -36,7 +36,7 @@ namespace LitePlanet.Projectiles
             explosion.Create(particle.Position);
             IDamageSink damageSink = other as IDamageSink;
             if (damageSink != null)
-                damageSink.TakeDamage(5);
+                damageSink.TakeDamage(20);
         }
 
         public IEnumerable<Particle> Particles 

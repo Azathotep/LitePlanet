@@ -31,9 +31,9 @@ namespace LitePlanet
         ParticlePool _smokeParticles;
         Bullets _bullets;
         Ship _ship;
-        Ship _aiShip;
         IPlanet _planet;
-        Pilot _pilot;
+        List<Ship> _aiShips = new List<Ship>();
+        List<Pilot> _aiPilots = new List<Pilot>();
 
         protected override void Initialize()
         {
@@ -44,10 +44,16 @@ namespace LitePlanet
             _ship = new Ship(this);
             _ship.Position = new Vector2(0, 20);
 
-            _aiShip = new Ship(this, true);
-            _aiShip.Position = new Vector2(5, 0);
-            _aiShip.Body.Rotation = 1f;
-            _pilot = new Pilot(_aiShip);
+            for (int i = 0; i < 5; i++)
+            {
+                Ship aiShip = new Ship(this, true);
+                aiShip.Position = new Vector2(i*2, 0);
+                aiShip.Body.Rotation = 1f;
+                Pilot pilot = new Pilot(aiShip);
+                _aiShips.Add(aiShip);
+                _aiPilots.Add(pilot);
+            }
+            
             Renderer.SetDeviceMode(800, 600, true);
             Renderer.Camera.SetAspect(80, 60);
             Renderer.Camera.LookAt(new Vector2(0, 0));
@@ -95,7 +101,7 @@ namespace LitePlanet
                     Exit();
                     break;
                 case Keys.Up:
-                    _ship.ApplyForwardThrust(16f);
+                    _ship.ApplyForwardThrust(10f);
                     break;
                 case Keys.L:
                     _ship.ApplyForwardThrust(-0.001f);
@@ -119,7 +125,8 @@ namespace LitePlanet
 
         protected override void UpdateFrame(GameTime gameTime, XnaKeyboardHandler keyHandler)
         {
-            _pilot.GoTo(_ship.Position);
+            foreach (Pilot p in _aiPilots)
+                p.GoTo(_ship.Position);
         }
 
         protected override void DrawFrame(GameTime gameTime)
@@ -130,12 +137,13 @@ namespace LitePlanet
             Renderer.DrawDepth = 0.4f;
             _ship.Draw(Renderer);
 
-            _aiShip.Draw(Renderer);
+            foreach (Ship s in _aiShips)
+                s.Draw(Renderer);
 
             Renderer.DrawDepth = 0.5f;
             foreach (Particle p in _exhaustParticles.Particles)
             {
-                float particleSize = 0.25f * (p.Life / 50f);
+                float particleSize = 0.45f * (p.Life / 50f);
                 float alpha = (float)p.Life * p.Life / (50 * 50);
                 Color color = new Color(1, 1, (float)p.Life / 60f);
                 p.Draw(Renderer, particleSize, color, alpha);
@@ -143,7 +151,7 @@ namespace LitePlanet
 
             foreach (Particle p in _smokeParticles.Particles)
             {
-                float particleSize = 0.4f;
+                float particleSize = 0.6f;
                 float alpha = (float)p.Life * p.Life / (50 * 50);
                 float c = (float)p.Life / 100;
                 Color color = new Color(c, c, c);

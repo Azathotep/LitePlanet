@@ -123,7 +123,7 @@ namespace LitePlanet.Vessels
             _fuel--;
             _body.ApplyForce(Facing * amount);
 
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 1; i++)
             {
                 Vector2 vel = Velocity - Facing * 5.1f;
                 vel.X += Dice.Next() * 1.6f - 0.8f;
