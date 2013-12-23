@@ -25,7 +25,6 @@ namespace LitePlanet
     public class Engine : LiteXnaEngine
     {
         LiteEngine.Textures.Texture _grassTexture = new LiteEngine.Textures.Texture("grass");
-        LiteEngine.Textures.Texture _circleTexture = new LiteEngine.Textures.Texture("circleOverlay");
         
         ParticlePool _exhaustParticles;
         ParticlePool _smokeParticles;
@@ -44,10 +43,10 @@ namespace LitePlanet
             _ship = new Ship(this);
             _ship.Position = new Vector2(0, 20);
 
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 3; i++)
             {
                 Ship aiShip = new Ship(this, true);
-                aiShip.Position = new Vector2(i*2, 0);
+                aiShip.Position = new Vector2(80 + i * 2, -30);
                 aiShip.Body.Rotation = 1f;
                 Pilot pilot = new Pilot(aiShip);
                 _aiShips.Add(aiShip);
@@ -126,7 +125,7 @@ namespace LitePlanet
         protected override void UpdateFrame(GameTime gameTime, XnaKeyboardHandler keyHandler)
         {
             foreach (Pilot p in _aiPilots)
-                p.GoTo(_ship.Position);
+                p.Target(this, _ship);
         }
 
         protected override void DrawFrame(GameTime gameTime)
@@ -167,17 +166,6 @@ namespace LitePlanet
             }
 
             Renderer.DrawSprite(_grassTexture, new RectangleF(0,40,200,30), 0);
-
-            if (Renderer.Camera.Zoom > 3)
-            {
-                float width = Renderer.Camera.Zoom;
-
-                Color c = Color.FromNonPremultiplied(0, 255, 0, 255);
-                Renderer.DrawSprite(_circleTexture, new RectangleF(_ship.Position.X, _ship.Position.Y, width, width), 0, c, 1f);
-
-                Vector2 front = _ship.Position + _ship.Facing * 2;
-                Renderer.DrawSprite(_circleTexture, new RectangleF(front.X, front.Y, width*0.4f, width*2), _ship.Rotation, c, 1f);
-            }
 
             Renderer.EndDraw();
 
