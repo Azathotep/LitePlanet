@@ -33,17 +33,26 @@ namespace LitePlanet
         IPlanet _planet;
         List<Ship> _aiShips = new List<Ship>();
         List<Pilot> _aiPilots = new List<Pilot>();
+        Dock _dock;
+        Building _building;
+        Building _building2;
 
         protected override void Initialize()
         {
-            Physics.SetGlobalGravity(new Vector2(0, 0.1f));
+            Physics.SetGlobalGravity(new Vector2(0, 5f));
             _exhaustParticles = ParticleSystem.CreateParticleFactory();
             _smokeParticles = ParticleSystem.CreateParticleFactory();
             _bullets = new Bullets(this);
             _ship = new Ship(this);
             _ship.Position = new Vector2(0, 20);
 
-            for (int i = 0; i < 3; i++)
+            _building = new Building(this, new Vector2(-10, 22), 6, 6);
+            _building2 = new Building(this, new Vector2(10, 22), 6, 6);
+            
+            //_dock = new Dock(this);
+            //_dock.Position = new Vector2(-20, 7);
+
+            for (int i = 0; i < 0; i++)
             {
                 Ship aiShip = new Ship(this, true);
                 aiShip.Position = new Vector2(80 + i * 2, -30);
@@ -139,6 +148,8 @@ namespace LitePlanet
             foreach (Ship s in _aiShips)
                 s.Draw(Renderer);
 
+            //_dock.Draw(Renderer);
+
             Renderer.DrawDepth = 0.5f;
             foreach (Particle p in _exhaustParticles.Particles)
             {
@@ -165,6 +176,9 @@ namespace LitePlanet
                 p.Draw(Renderer, particleSize, color, alpha);
             }
 
+            _building.Draw(Renderer);
+            _building2.Draw(Renderer);
+
             Renderer.DrawSprite(_grassTexture, new RectangleF(0,40,200,30), 0);
 
             Renderer.EndDraw();
@@ -182,12 +196,12 @@ namespace LitePlanet
 
     class Dock
     {
-        static LiteEngine.Textures.Texture _texture = new LiteEngine.Textures.Texture("grass");
+        static LiteEngine.Textures.Texture _texture = new LiteEngine.Textures.Texture("building");
         Body _body;
 
         public Dock(Engine engine)
         {
-            _body = engine.Physics.CreateRectangleBody(null, 3, 1, 1);
+            _body = engine.Physics.CreateRectangleBody(null, 4f, 20f, 1);
             _body.IsStatic = true;
         }
 
@@ -211,7 +225,8 @@ namespace LitePlanet
 
         public void Draw(XnaRenderer renderer)
         {
-            renderer.DrawSprite(_texture, new RectangleF(Position.X, Position.Y, 3, 1), 0);
+            for (int y=0;y<5;y++)
+                renderer.DrawSprite(_texture, new RectangleF(Position.X, Position.Y + y * 4, 4, 4), 0);
         }
     }
 }
