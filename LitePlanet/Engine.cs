@@ -37,6 +37,8 @@ namespace LitePlanet
         Building _building;
         Building _building2;
 
+        VertexBuffer _vb;
+
         protected override void Initialize()
         {
             Physics.SetGlobalGravity(new Vector2(0, 5f));
@@ -66,6 +68,22 @@ namespace LitePlanet
             Renderer.Camera.SetAspect(80, 60);
             Renderer.Camera.LookAt(new Vector2(0, 0));
 
+
+            numPrimitives = 40000;
+            _vb = Renderer.CreateVertexBuffer(numPrimitives);
+            List<VertexPositionColorTexture> vl = new List<VertexPositionColorTexture>();
+            for (int i = 0; i < numPrimitives; i++)
+            {
+                float w = 1;
+                float x = (i % 100) *w;
+                float y = i / 100 * w;
+                vl.Add(new VertexPositionColorTexture(new Vector3(x, y, 0), Color.Red, new Vector2(0, 0)));
+                vl.Add(new VertexPositionColorTexture(new Vector3(x+w, y, 0), Color.Red, new Vector2(1, 0)));
+                vl.Add(new VertexPositionColorTexture(new Vector3(x+w, y+w, 0), Color.Red, new Vector2(1, 1)));
+            }
+            VertexPositionColorTexture[] vertices = vl.ToArray();
+            _vb.SetData(vertices);
+
             Body body = Physics.CreateRectangleBody(null, 200f,30f,1f);
             body.IsStatic = true;
             body.Restitution = 0.3f;
@@ -76,6 +94,8 @@ namespace LitePlanet
             body.CollidesWith = Category.All;
             base.Initialize();
         }
+
+        int numPrimitives;
 
         public ParticlePool SmokeParticles
         {
@@ -140,9 +160,13 @@ namespace LitePlanet
         protected override void DrawFrame(GameTime gameTime)
         {
             Renderer.Clear(Color.Black);
+
+            
+
             Renderer.BeginDraw();
 
             Renderer.DrawDepth = 0.4f;
+
             _ship.Draw(Renderer);
 
             foreach (Ship s in _aiShips)
@@ -182,6 +206,9 @@ namespace LitePlanet
             Renderer.DrawSprite(_grassTexture, new RectangleF(0,40,200,30), 0);
 
             Renderer.EndDraw();
+
+            Renderer.DrawUserPrimitives(_vb, _grassTexture);
+
 
             Renderer.BeginDrawToScreen();
             string frameRate = FrameRate + " FPS";
