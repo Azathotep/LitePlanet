@@ -12,13 +12,13 @@ namespace UnitTests
         [TestMethod]
         public void CreatePlanet()
         {
-            IPlanet planet = new Planet(30);
+            Planet planet = new Planet(30);
         }
 
         [TestMethod]
         public void TestPolarToCartesian()
         {
-            IPlanet planet = new Planet(100);
+            Planet planet = new Planet(100);
             Vector2 polar = planet.PolarToCaresian(new Vector2(0, 0));
             Assert.AreEqual(new Vector2(0, 0), polar, "");
         }

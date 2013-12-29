@@ -23,6 +23,7 @@ namespace LitePlanet.Projectiles
         public Particle CreateBullet(Vector2 position, Vector2 velocity)
         {
             Particle particle = _pool.CreateParticle(position, velocity, 30);
+            particle.Body.IsBullet = true;
             particle.Body.CollidesWith = Category.Cat1 | Category.Cat2;
             particle.Body.CollisionCategories = Category.Cat2;
             particle.OnCollideWithOther += particle_OnCollideWithOther;

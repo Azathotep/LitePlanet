@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using FarseerPhysics.Dynamics;
+using FarseerPhysics.Controllers;
 using LiteEngine.Physics;
 using LiteEngine.Input;
 using LiteEngine.Core;
@@ -30,7 +31,7 @@ namespace LitePlanet
         ParticlePool _smokeParticles;
         Bullets _bullets;
         Ship _ship;
-        IPlanet _planet;
+        Planet _planet;
         List<Ship> _aiShips = new List<Ship>();
         List<Pilot> _aiPilots = new List<Pilot>();
         Dock _dock;
@@ -38,18 +39,26 @@ namespace LitePlanet
         Building _building2;
 
         VertexBuffer _vb;
+        VertexPositionColorTexture[] vertices;
 
         protected override void Initialize()
         {
-            Physics.SetGlobalGravity(new Vector2(0, 5f));
+            Physics.SetGlobalGravity(new Vector2(0, 0f));
+
+            GravityController gc = new GravityController(1550, 10000, 1);
+            gc.Enabled = true;
+            gc.AddPoint(new Vector2(0, 0));
+            Physics.World.AddController(gc);
+
             _exhaustParticles = ParticleSystem.CreateParticleFactory();
             _smokeParticles = ParticleSystem.CreateParticleFactory();
+            _planet = new Planet(500);
             _bullets = new Bullets(this);
             _ship = new Ship(this);
-            _ship.Position = new Vector2(0, 20);
+            _ship.Position = new Vector2(0, 510);
 
-            _building = new Building(this, new Vector2(-10, 22), 6, 6);
-            _building2 = new Building(this, new Vector2(10, 22), 6, 6);
+            //_building = new Building(this, new Vector2(-10, 22), 6, 6);
+            //_building2 = new Building(this, new Vector2(10, 22), 6, 6);
             
             //_dock = new Dock(this);
             //_dock.Position = new Vector2(-20, 7);
@@ -57,7 +66,7 @@ namespace LitePlanet
             for (int i = 0; i < 0; i++)
             {
                 Ship aiShip = new Ship(this, true);
-                aiShip.Position = new Vector2(80 + i * 2, -30);
+                aiShip.Position = new Vector2(60 + i * 2, -20);
                 aiShip.Body.Rotation = 1f;
                 Pilot pilot = new Pilot(aiShip);
                 _aiShips.Add(aiShip);
@@ -68,30 +77,29 @@ namespace LitePlanet
             Renderer.Camera.SetAspect(80, 60);
             Renderer.Camera.LookAt(new Vector2(0, 0));
 
-
             numPrimitives = 40000;
-            _vb = Renderer.CreateVertexBuffer(numPrimitives);
-            List<VertexPositionColorTexture> vl = new List<VertexPositionColorTexture>();
-            for (int i = 0; i < numPrimitives; i++)
-            {
-                float w = 1;
-                float x = (i % 100) *w;
-                float y = i / 100 * w;
-                vl.Add(new VertexPositionColorTexture(new Vector3(x, y, 0), Color.Red, new Vector2(0, 0)));
-                vl.Add(new VertexPositionColorTexture(new Vector3(x+w, y, 0), Color.Red, new Vector2(1, 0)));
-                vl.Add(new VertexPositionColorTexture(new Vector3(x+w, y+w, 0), Color.Red, new Vector2(1, 1)));
-            }
-            VertexPositionColorTexture[] vertices = vl.ToArray();
-            _vb.SetData(vertices);
 
-            Body body = Physics.CreateRectangleBody(null, 200f,30f,1f);
-            body.IsStatic = true;
-            body.Restitution = 0.3f;
-            body.Friction = 1f;
-            body.Rotation = 0;
-            body.Position = new Vector2(0, 40);
-            body.CollisionCategories = Category.Cat1;
-            body.CollidesWith = Category.All;
+            //_vb = Renderer.CreateVertexBuffer(numPrimitives);
+            //List<VertexPositionColorTexture> vl = new List<VertexPositionColorTexture>();
+            //for (int i = 0; i < numPrimitives; i++)
+            //{
+            //    float w = 1;
+            //    float x = (i % 100) *w;
+            //    float y = i / 100 * w;
+            //    vl.Add(new VertexPositionColorTexture(new Vector3(x, y, 0), Color.Red, new Vector2(0, 0)));
+            //    vl.Add(new VertexPositionColorTexture(new Vector3(x+w, y, 0), Color.Red, new Vector2(1, 0)));
+            //    vl.Add(new VertexPositionColorTexture(new Vector3(x+w, y+w, 0), Color.Red, new Vector2(1, 1)));
+            //}
+            //vertices = vl.ToArray();
+
+            //Body body = Physics.CreateRectangleBody(null, 200f,30f,1f);
+            //body.IsStatic = true;
+            //body.Restitution = 0.3f;
+            //body.Friction = 1f;
+            //body.Rotation = 0;
+            //body.Position = new Vector2(0, 40);
+            //body.CollisionCategories = Category.Cat1;
+            //body.CollidesWith = Category.All;
             base.Initialize();
         }
 
@@ -153,14 +161,35 @@ namespace LitePlanet
 
         protected override void UpdateFrame(GameTime gameTime, XnaKeyboardHandler keyHandler)
         {
+            //_vb.SetData(vertices, 0, vertices.Length / 3);
+
             foreach (Pilot p in _aiPilots)
                 p.Target(this, _ship);
         }
 
         protected override void DrawFrame(GameTime gameTime)
         {
+            if (_planet.Dirty)
+            {
+                Vector2 v = _planet.CartesianToPolar(_ship.Position);
+                int x = (int)v.X - 30;
+                int y = (int)v.Y - 40;
+                _planet.GenerateVertexBuffer(this, Renderer, x, y, 60, 80);
+
+                _planet.GenerateStaticBodies(this, (int)v.X, (int)v.Y);
+                //_planet.Dirty = false;
+            }
+
+            float angle = (float)Math.Atan2(_ship.Position.X, -_ship.Position.Y);
+            Renderer.Camera.LookAt(_ship.Position, angle);
+
             Renderer.Clear(Color.Black);
 
+            //TODO why have to do this?
+            Renderer.BeginDraw();
+            Renderer.EndDraw();
+
+            _planet.Draw(Renderer);
             
 
             Renderer.BeginDraw();
@@ -194,21 +223,18 @@ namespace LitePlanet
 
             foreach (Particle p in _bullets.Particles)
             {
-                float particleSize = 0.2f;
-                float alpha = 1f;
-                Color color = Color.Yellow;
+                float particleSize = 0.4f;
+                float alpha = 0.8f;
+                Color color = Color.Cyan;
                 p.Draw(Renderer, particleSize, color, alpha);
             }
 
-            _building.Draw(Renderer);
-            _building2.Draw(Renderer);
+            //_building.Draw(Renderer);
+            //_building2.Draw(Renderer);
 
-            Renderer.DrawSprite(_grassTexture, new RectangleF(0,40,200,30), 0);
+            //Renderer.DrawSprite(_grassTexture, new RectangleF(0,40,200,30), 0);
 
             Renderer.EndDraw();
-
-            Renderer.DrawUserPrimitives(_vb, _grassTexture);
-
 
             Renderer.BeginDrawToScreen();
             string frameRate = FrameRate + " FPS";

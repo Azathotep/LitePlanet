@@ -33,7 +33,7 @@ namespace LitePlanet.Vessels
             _body = engine.Physics.CreateBody(this);
             _body.BodyType = BodyType.Dynamic;
             _body.AngularDamping = 0.5f;
-            _body.Friction = 1f;
+            _body.Friction = 5f;
             _body.Restitution = 0f;
             _body.Mass = 0.5f;
             _body.Rotation = 0f;
@@ -66,7 +66,7 @@ namespace LitePlanet.Vessels
         }
 
 
-        int _hull = 100;
+        int _hull = 10000;
         public int Hull
         {
             get
@@ -180,6 +180,9 @@ namespace LitePlanet.Vessels
         public void OnCollideWith(IPhysicsObject self, IPhysicsObject other, float impulse)
         {
             TakeDamage((int)Math.Pow(impulse * 2, 2));
+
+            //IDamageSink sink = other as IDamageSink;
+            //sink.TakeDamage((int)impulse * 2);
         }
 
         public void TakeDamage(int damageAmount)
@@ -191,7 +194,7 @@ namespace LitePlanet.Vessels
                 _fuel = 0;
                 Explosion explosion = new Explosion(_engine);
                 explosion.Create(Position);
-                _engine.Physics.RemoveBody(_body);
+                //_engine.Physics.RemoveBody(_body);
             }
         }
     }
