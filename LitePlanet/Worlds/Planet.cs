@@ -43,7 +43,7 @@ namespace LitePlanet.Worlds
                         type = WorldTileType.Earth;
 
                     if (y < _tHeight - 1)
-                        if (LiteEngine.Core.Dice.Next(10) == 0)
+                        if (LiteEngine.Core.Dice.Next(30) == 0)
                             type = WorldTileType.SolidRock;
 
                     if (y < _tHeight - 10)
@@ -89,9 +89,9 @@ namespace LitePlanet.Worlds
                     Vector2 c3 = PolarToCartesian(new Vector2(x + 1, y));
                     Vector2 c4 = PolarToCartesian(new Vector2(x + 1, y + 1));
 
+                    Color color = Color.White;
                     bool destroyed = tile.Health == 0;
                     bool dirt = y == _height;
-                    bool stone = y < _height - 1;
                     bool lava = y < _height - _tHeight;
                     float tx = 0;
                     float ty = 0;
@@ -100,10 +100,24 @@ namespace LitePlanet.Worlds
                     {
                         ty = 0.26f;
                     }
-                    else if (stone)
+                    else
                     {
                         switch (tile.Type)
                         {
+                            case WorldTileType.Sky:
+                                tx = 0.52f;
+                                ty = 0.26f;
+
+                                float heightAboveSurface = (float)(y - _height);
+
+                                float propToSpace = heightAboveSurface / 50;
+
+                                float thickness = 2 - propToSpace;
+                                thickness = MathHelper.Clamp(thickness, 0, 1);
+
+                                float yy = thickness;
+                                color = Color.Lerp(Color.FromNonPremultiplied(64, 198, 255, 0), Color.FromNonPremultiplied(64, 198, 255, 255), yy); //Color.FromNonPremultiplied(0,0,0,0), yy);
+                                break;
                             case WorldTileType.Earth:
                                 tx = 0f;
                                 ty = 0f;
@@ -126,13 +140,13 @@ namespace LitePlanet.Worlds
                                 break;
                         }
                     }
-                    vl.Add(new VertexPositionColorTexture(new Vector3(c1, 0), Color.White, new Vector2(tx, ty + tw)));
-                    vl.Add(new VertexPositionColorTexture(new Vector3(c2, 0), Color.White, new Vector2(tx, ty)));
-                    vl.Add(new VertexPositionColorTexture(new Vector3(c3, 0), Color.White, new Vector2(tx + tw, ty + tw)));
+                    vl.Add(new VertexPositionColorTexture(new Vector3(c1, 0), color, new Vector2(tx, ty + tw)));
+                    vl.Add(new VertexPositionColorTexture(new Vector3(c2, 0), color, new Vector2(tx, ty)));
+                    vl.Add(new VertexPositionColorTexture(new Vector3(c3, 0), color, new Vector2(tx + tw, ty + tw)));
 
-                    vl.Add(new VertexPositionColorTexture(new Vector3(c3, 0), Color.White, new Vector2(tx + tw, ty + tw)));
-                    vl.Add(new VertexPositionColorTexture(new Vector3(c2, 0), Color.White, new Vector2(tx, ty)));
-                    vl.Add(new VertexPositionColorTexture(new Vector3(c4, 0), Color.White, new Vector2(tx + tw, ty)));
+                    vl.Add(new VertexPositionColorTexture(new Vector3(c3, 0), color, new Vector2(tx + tw, ty + tw)));
+                    vl.Add(new VertexPositionColorTexture(new Vector3(c2, 0), color, new Vector2(tx, ty)));
+                    vl.Add(new VertexPositionColorTexture(new Vector3(c4, 0), color, new Vector2(tx + tw, ty)));
                 }
             _vCount = vl.Count;
             if (vl.Count == 0)
@@ -158,9 +172,12 @@ namespace LitePlanet.Worlds
         }
 
         static WorldTile _lavaTile = new WorldTile(null, WorldTileType.Lava);
+        static WorldTile _skyTile = new WorldTile(null, WorldTileType.Sky);
 
         public WorldTile GetTile(int x, int y)
         {
+            if (y >= _height)
+                return _skyTile;
             if (y < 0 || y >= _height)
                 return null;
             x = (x % _width + _width) % _width;
@@ -201,6 +218,14 @@ namespace LitePlanet.Worlds
                     tile.SetBody(engine.Physics, new Vector2[] { c1, c2, c4, c3 });
                 }
         }
+
+        public int Radius 
+        {
+            get
+            {
+                return _height;
+            }
+        }
     }
 
     public enum WorldTileType
@@ -209,7 +234,8 @@ namespace LitePlanet.Worlds
         Rock,
         SolidRock,
         Gold,
-        Lava
+        Lava,
+        Sky
     }
 
     public class WorldTile : IPhysicsObject, IDamageSink
@@ -238,9 +264,9 @@ namespace LitePlanet.Worlds
             if (_body == null && Health > 0)
             {
                 _body = physics.CreateBody(this);
+                _body.Restitution = -0.5f;
+                _body.Friction = 0f;
                 _body.IsStatic = true;
-                _body.Restitution = 0.5f;
-                _body.Friction = 20f;
                 Vertices v = new Vertices(vertices);
                 FixtureFactory.AttachPolygon(v, 1, _body, null);
             }
@@ -263,7 +289,7 @@ namespace LitePlanet.Worlds
         {
             if (damageAmount < 1)
                 return;
-            if (Type == WorldTileType.Gold || Type == WorldTileType.Lava || Type == WorldTileType.SolidRock)
+            if (Type == WorldTileType.Gold || Type == WorldTileType.Lava || Type == WorldTileType.SolidRock || Type == WorldTileType.Sky)
                 return;
             if (Health == 0)
                 return;

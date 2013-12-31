@@ -44,8 +44,13 @@ namespace LitePlanet.AI
             return (float)Math.Atan2(v.X, -v.Y);
         }
 
+        int s = 0;
+
         internal void Target(Engine engine, Ship target)
         {
+            if (_ship.Hull <= 0)
+                return;
+
             Vector2 aimPoint = target.Position + target.Velocity * LiteEngine.Core.Dice.Next() * 1;
 
             float dist = Vector2.Distance(target.Position, _ship.Position);
@@ -53,10 +58,13 @@ namespace LitePlanet.AI
             float angle = AngleFrom(_ship.Position, aimPoint);
             RotateToFace(angle);
 
-            if (dist < 40)
+            if (s > 0)
+                s--;
+            if (dist < 40 && s == 0)
             {
-                if (Math.Abs(AngleBetween(_ship.Rotation, angle)) < 0.1f)
+                if (Math.Abs(AngleBetween(_ship.Rotation, angle)) < 0.2f)
                     _ship.PrimaryWeapon.Fire(engine, _ship, _ship.Position, _ship.Facing);
+                s = 20;
             }
             else
             {
@@ -73,7 +81,7 @@ namespace LitePlanet.AI
             RotateToFace(angle);
 
             if (Math.Abs(AngleBetween(_ship.Rotation, angle)) < 0.3f)
-                _ship.ApplyForwardThrust(3f);
+                _ship.ApplyForwardThrust(2f);
 
         }
     }

@@ -22,7 +22,7 @@ namespace LitePlanet.Weapons
             _recharge++;
             if (_recharge < 3)
                 return;
-            position += Dice.RandomVector(0.05f);
+            position += Dice.RandomVector(0.15f);
             Particle particle = engine.Bullets.CreateBullet(position, direction * 150);
             particle.Body.IgnoreCollisionWith(firer.Body);
             _recharge = 0;

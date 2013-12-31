@@ -33,8 +33,8 @@ namespace LitePlanet.Vessels
             _body = engine.Physics.CreateBody(this);
             _body.BodyType = BodyType.Dynamic;
             _body.AngularDamping = 0.5f;
-            _body.Friction = 5f;
-            _body.Restitution = 0f;
+            _body.Friction = 0f;
+            _body.Restitution = 1.1f;
             _body.Mass = 0.5f;
             _body.Rotation = 0f;
             _body.LinearVelocity = new Vector2(0, 5);
@@ -47,6 +47,8 @@ namespace LitePlanet.Vessels
 
             if (other)
                 _hostile = true;
+            if (_hostile)
+                _hull = 10000;
         }
 
         public Body Body
@@ -66,7 +68,7 @@ namespace LitePlanet.Vessels
         }
 
 
-        int _hull = 10000;
+        int _hull = 2000;
         public int Hull
         {
             get
@@ -118,6 +120,10 @@ namespace LitePlanet.Vessels
             {
                 return _body.Rotation;
             }
+            set
+            {
+                _body.Rotation = value;
+            }
         }
 
         int s = 0;
@@ -127,6 +133,13 @@ namespace LitePlanet.Vessels
                 return;
             _fuel--;
             _body.ApplyForce(Facing * amount);
+            float len = _body.LinearVelocity.LengthSquared();
+
+            float maxSpeed = 180;
+            if (_hostile)
+                maxSpeed = 120;
+            if (len > maxSpeed)
+                _body.LinearVelocity *= maxSpeed / len;
             int max = 0;
             if (s > 3)
             {
