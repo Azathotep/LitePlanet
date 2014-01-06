@@ -15,9 +15,11 @@ using FarseerPhysics.Dynamics;
 using LitePlanet.Effects;
 using LitePlanet.Weapons;
 using LitePlanet.Projectiles;
+using LitePlanet.Worlds;
+
 namespace LitePlanet.Vessels
 {
-    class Ship : IPhysicsObject, IDamageSink
+    class Ship : IPhysicsObject, IDamageSink, ICollisionField
     {
         Cannon _cannon;
         Body _body;
@@ -48,7 +50,7 @@ namespace LitePlanet.Vessels
             if (other)
                 _hostile = true;
             if (_hostile)
-                _hull = 10000;
+                _hull = 50;
         }
 
         public Body Body
@@ -135,9 +137,9 @@ namespace LitePlanet.Vessels
             _body.ApplyForce(Facing * amount);
             float len = _body.LinearVelocity.LengthSquared();
 
-            float maxSpeed = 180;
+            float maxSpeed = 240;
             if (_hostile)
-                maxSpeed = 120;
+                maxSpeed = 360;
             if (len > maxSpeed)
                 _body.LinearVelocity *= maxSpeed / len;
             int max = 0;
@@ -152,13 +154,13 @@ namespace LitePlanet.Vessels
                 Vector2 vel = Velocity - Facing * 5.1f;
                 vel.X += Dice.Next() * 1.6f - 0.8f;
                 vel.Y += Dice.Next() * 1.6f - 0.8f;
-                Particle exhaust = _engine.ExhaustParticles.CreateParticle(Position, vel, 50);
-                if (exhaust == null)
-                    break;
-                exhaust.Body.CollidesWith = Category.Cat1;
-                exhaust.Body.CollisionCategories = Category.Cat6;
-                Vector2 p = Position - Facing * 0.7f + Dice.RandomVector(0.3f);
-                _engine.SmokeParticles.CreateParticle(p, Velocity * 0, 50);
+                //Particle exhaust = _engine.ExhaustParticles.CreateParticle(Position, vel, 50);
+                //if (exhaust == null)
+                //    break;
+                //exhaust.Body.CollidesWith = Category.Cat1;
+                //exhaust.Body.CollisionCategories = Category.Cat6;
+                //Vector2 p = Position - Facing * 0.7f + Dice.RandomVector(0.3f);
+                //_engine.SmokeParticles.CreateParticle(p, Velocity * 0, 50);
             }
         }
 
@@ -208,6 +210,22 @@ namespace LitePlanet.Vessels
                 Explosion explosion = new Explosion(_engine);
                 explosion.Create(Position);
                 //_engine.Physics.RemoveBody(_body);
+            }
+        }
+
+        Vector2 ICollisionField.Position
+        {
+            get 
+            {
+                return Position;
+            }
+        }
+
+        int ICollisionField.Size
+        {
+            get 
+            {
+                return 15;
             }
         }
     }

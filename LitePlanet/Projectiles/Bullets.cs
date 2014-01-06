@@ -33,8 +33,8 @@ namespace LitePlanet.Projectiles
         void particle_OnCollideWithOther(Particle particle, IPhysicsObject other, float impulse)
         {
             particle.Life = 0;
-            Explosion explosion = new Explosion(_engine);
-            explosion.Create(particle.Position);
+            //Explosion explosion = new Explosion(_engine);
+            //explosion.Create(particle.Position);
             IDamageSink damageSink = other as IDamageSink;
             if (damageSink != null)
                 damageSink.TakeDamage(20);

@@ -27,7 +27,7 @@ namespace LitePlanet
     {
         LiteEngine.Textures.Texture _starsTexture = new LiteEngine.Textures.Texture("stars");
         LiteEngine.Textures.Texture _planetTexture = new LiteEngine.Textures.Texture("planet");
-        
+
         ParticlePool _exhaustParticles;
         ParticlePool _smokeParticles;
         Bullets _bullets;
@@ -44,17 +44,19 @@ namespace LitePlanet
             Physics.SetGlobalGravity(new Vector2(0f, 0f));
 
             GravityController gc = new GravityController(0, 10000, 1);
-            gc.Enabled = true;
+            gc.Enabled =
+                true;
             gc.AddPoint(new Vector2(0, 0));
             Physics.World.AddController(gc);
 
             _exhaustParticles = ParticleSystem.CreateParticleFactory();
             _smokeParticles = ParticleSystem.CreateParticleFactory();
-            _planet = new Planet(500);
+            _planet = new Planet(Physics, 500);
             _bullets = new Bullets(this);
             _ship = new Ship(this);
             _ship.Position = new Vector2(0, 500);
             _ship.Rotation = (float)Math.PI;
+            _planet.CollisionFieldGenerator.RegisterCollisionField(_ship);
 
             //_building = new Building(this, new Vector2(-10, 22), 6, 6);
             //_building2 = new Building(this, new Vector2(10, 22), 6, 6);
@@ -62,7 +64,7 @@ namespace LitePlanet
             //_dock = new Dock(this);
             //_dock.Position = new Vector2(-20, 7);
 
-            for (int i = 0; i < 1; i++)
+            for (int i = 0; i < 25; i++)
             {
                 Ship aiShip = new Ship(this, true);
                 aiShip.Position = new Vector2(_ship.Position.X - 100 + i * 2, _ship.Position.Y + 60);
@@ -70,20 +72,12 @@ namespace LitePlanet
                 Pilot pilot = new Pilot(aiShip);
                 _aiShips.Add(aiShip);
                 _aiPilots.Add(pilot);
+                _planet.CollisionFieldGenerator.RegisterCollisionField(aiShip);
             }
             
             Renderer.SetDeviceMode(800, 600, true);
             Renderer.Camera.SetAspect(80, 60);
             Renderer.Camera.LookAt(new Vector2(0, 0));
-
-            //Body body = Physics.CreateRectangleBody(null, 200f,30f,1f);
-            //body.IsStatic = true;
-            //body.Restitution = 0.3f;
-            //body.Friction = 1f;
-            //body.Rotation = 0;
-            //body.Position = new Vector2(0, 40);
-            //body.CollisionCategories = Category.Cat1;
-            //body.CollidesWith = Category.All;
             base.Initialize();
         }
 
@@ -136,7 +130,10 @@ namespace LitePlanet
                     _freeCamera = !_freeCamera;
                     return 10;
                 case Keys.N:
-                    Renderer.Camera.ChangeZoom(Renderer.Camera.Zoom * 1.01f);
+                    Renderer.Camera.ChangeZoom(Renderer.Camera.Zoom * 1.05f);
+                    break;
+                case Keys.M:
+                    Renderer.Camera.ChangeZoom(Renderer.Camera.Zoom * 0.95f);
                     break;
                 case Keys.Space:
                     _ship.PrimaryWeapon.Fire(this, _ship, _ship.Position, _ship.Facing);
@@ -148,15 +145,15 @@ namespace LitePlanet
 
         protected override void UpdateFrame(GameTime gameTime, XnaKeyboardHandler keyHandler)
         {
-            //_vb.SetData(vertices, 0, vertices.Length / 3);
-
+            _planet.CollisionFieldGenerator.UpdateFields();
             foreach (Pilot p in _aiPilots)
                 p.Target(this, _ship);
         }
 
         float fx = 0;
         bool cloudLeft = false;
-        
+
+        Vector2I _shipPos;
         protected override void DrawFrame(GameTime gameTime)
         {
             if (_planet.Dirty)
@@ -168,9 +165,18 @@ namespace LitePlanet
 
                 v = _planet.CartesianToPolar(_ship.Position);
 
-                _planet.GenerateStaticBodies(this, (int)v.X, (int)v.Y);
-                //_planet.Dirty = false;
+                //_planet.GenerateStaticBodies(this, (int)v.X, (int)v.Y);
+                _planet.Dirty = false;
             }
+
+
+            if (_ship.Position.X != _shipPos.X || _ship.Position.Y != _shipPos.Y)
+            {
+                _planet.Dirty = true;
+                _shipPos.X = (int)_ship.Position.X;
+                _shipPos.Y = (int)_ship.Position.Y;
+            }
+
 
             float angle = (float)Math.Atan2(_ship.Position.X, -_ship.Position.Y);
             if (!_freeCamera)
@@ -186,10 +192,7 @@ namespace LitePlanet
             if (Dice.Next() < 0.01f)
                 cloudLeft = !cloudLeft;
 
-            Renderer.BeginDrawToScreen();
-            Renderer.DrawSprite(_starsTexture, new RectangleF(0, 0, Renderer.ScreenWidth, Renderer.ScreenHeight), 0.2f, 0, new Vector2(0f,0f), Color.White, false, false);
-            
-            Renderer.EndDraw();
+            DrawStars(Renderer);
 
             //Renderer.DrawDepth = 0.2f;
             //Renderer.Begin(Matrix.Identity, Renderer.Camera.Projection, Matrix.CreateLookAt(new Vector3(0, 0, -1), new Vector3(0, 0, 0), new Vector3(0, 1, 0)));
@@ -197,14 +200,17 @@ namespace LitePlanet
             //Renderer.DrawSprite(_starsTexture, new RectangleF(fx, 0, 80, 80), 0.2f, 0, new Vector2(0.5f, 0.5f), Color.FromNonPremultiplied(255, 255, 255, 100), false, true);
             //Renderer.EndDraw();
 
-            //TODO why have to do this? Initializing the matrices?
+            //TODO find out why have to call Renderer.BeginDraw()/endDraw() before _planet.Draw() works. Initializing the matrices?
             Renderer.BeginDraw();
-
-            Renderer.DrawSprite(_planetTexture, new RectangleF(0, 700, 100, 100), 0.2f, 0, new Vector2(0.5f, 0.5f), Color.White, false, false);
-            
+            Renderer.DrawSprite(_planetTexture, new RectangleF(0, 0, 1085, 1085), 0.2f, 0, new Vector2(0.5f, 0.5f), Color.White, false, false);
             Renderer.EndDraw();
 
-            _planet.Draw(Renderer);
+            Renderer.BeginDraw();
+            Renderer.DrawSprite(_planetTexture, new RectangleF(10000, 0, 1085, 1085), 0.2f, 0, new Vector2(0.5f, 0.5f), Color.White, false, false);
+            Renderer.EndDraw();
+
+            if (Renderer.Camera.Zoom <= 1)
+                _planet.Draw(Renderer);
 
             
             Renderer.BeginDraw();
@@ -216,6 +222,11 @@ namespace LitePlanet
             foreach (Ship s in _aiShips)
                 s.Draw(Renderer);
 
+            float altitude = _ship.Position.Length() - _planet.Radius;
+            float zoom = 1;
+            if (altitude > 25)
+                zoom = altitude / 25;
+            Renderer.Camera.ChangeZoom(zoom);
             //_dock.Draw(Renderer);
 
             Renderer.DrawDepth = 0.5f;
@@ -255,9 +266,15 @@ namespace LitePlanet
 
             Renderer.DrawStringBox("Fuel: " + _ship.Fuel, new RectangleF(10, 30, 120, 10), Color.White);
             Renderer.DrawStringBox("Hull: " + _ship.Hull, new RectangleF(10, 50, 120, 10), Color.White);
-
             Renderer.DrawStringBox("Altitude: " + (_ship.Position.Length() - _planet.Radius), new RectangleF(11, 71, 200, 10), Color.White);
             Renderer.EndDraw();
+        }
+
+        private void DrawStars(XnaRenderer renderer)
+        {
+            renderer.BeginDrawToScreen();
+            renderer.DrawSprite(_starsTexture, new RectangleF(0, 0, Renderer.ScreenWidth, Renderer.ScreenHeight), 0.2f, 0, new Vector2(0f, 0f), Color.White, false, false);
+            renderer.EndDraw();
         }
     }
 

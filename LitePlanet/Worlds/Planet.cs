@@ -20,7 +20,8 @@ namespace LitePlanet.Worlds
         int _width = 100;
         int _height;
 
-        WorldTile[,] _tiles;
+        PlanetTile[,] _tiles;
+        CollisionFieldGenerator _collisionFieldGenerator;
 
         public bool Dirty = true;
         int _tHeight = 100;
@@ -29,11 +30,13 @@ namespace LitePlanet.Worlds
         /// Constructor
         /// </summary>
         /// <param name="radius">radius of planet in tiles</param>
-        public Planet(int radius)
+        public Planet(PhysicsCore physics, int radius)
         {
+            _physics = physics;
+            _collisionFieldGenerator = new CollisionFieldGenerator(this);
             _width = 1800;
             _height = radius;
-            _tiles = new WorldTile[_width, _tHeight];
+            _tiles = new PlanetTile[_width, _tHeight];
             for (int y = 0; y < _tHeight; y++)
                 for (int x = 0; x < _width; x++)
                 {
@@ -50,8 +53,33 @@ namespace LitePlanet.Worlds
                         if (LiteEngine.Core.Dice.Next(1500) == 0)
                             type = WorldTileType.Gold;
 
-                    _tiles[x, y] = new WorldTile(this, type);
+                    _tiles[x, y] = new PlanetTile(this, x, _height - _tHeight + y, type);
                 }
+        }
+
+        public CollisionFieldGenerator CollisionFieldGenerator
+        {
+            get
+            {
+                return _collisionFieldGenerator;
+            }
+        }
+
+        public int Radius
+        {
+            get
+            {
+                return _height;
+            }
+        }
+
+        PhysicsCore _physics;
+        public PhysicsCore Physics
+        {
+            get
+            {
+                return _physics;
+            }
         }
 
         public Vector2 CartesianToPolar(Vector2 cCoords)
@@ -63,7 +91,7 @@ namespace LitePlanet.Worlds
             return new Vector2(x, y);
         }
 
-        Vector2 PolarToCartesian(Vector2 polar)
+        public Vector2 PolarToCartesian(Vector2 polar)
         {
             float angle = 2f * (float)Math.PI * polar.X / _width;
             float radius = polar.Y; // _width / (2f * (float)Math.PI) + polar.Y;
@@ -80,7 +108,7 @@ namespace LitePlanet.Worlds
                 {
                     int x = (px % _width + _width) % _width;
                     int y = py;
-                    WorldTile tile = GetTile(x, y);
+                    PlanetTile tile = GetTile(x, y);
                     if (tile == null)
                         continue;
                     //calculate the four corner positions in world space
@@ -140,6 +168,14 @@ namespace LitePlanet.Worlds
                                 break;
                         }
                     }
+
+                    //if (tile.CollisionBody._useCount == 1)
+                    //    color = Color.Red;
+                    //if (tile.CollisionBody._useCount == 2)
+                    //    color = Color.Blue;
+                    //if (tile.CollisionBody._useCount > 2)
+                    //    color = Color.Purple;
+
                     vl.Add(new VertexPositionColorTexture(new Vector3(c1, 0), color, new Vector2(tx, ty + tw)));
                     vl.Add(new VertexPositionColorTexture(new Vector3(c2, 0), color, new Vector2(tx, ty)));
                     vl.Add(new VertexPositionColorTexture(new Vector3(c3, 0), color, new Vector2(tx + tw, ty + tw)));
@@ -171,13 +207,13 @@ namespace LitePlanet.Worlds
             renderer.DrawUserPrimitives(_vb, _grassTexture, _vCount / 3);
         }
 
-        static WorldTile _lavaTile = new WorldTile(null, WorldTileType.Lava);
-        static WorldTile _skyTile = new WorldTile(null, WorldTileType.Sky);
+        static PlanetTile _lavaTile = new PlanetTile(null, 0, 0, WorldTileType.Lava);
+        static PlanetTile _skyTile = new PlanetTile(null, 0, 0, WorldTileType.Sky);
 
-        public WorldTile GetTile(int x, int y)
+        public PlanetTile GetTile(int x, int y)
         {
             if (y >= _height)
-                return _skyTile;
+                return null; // _skyTile;
             if (y < 0 || y >= _height)
                 return null;
             x = (x % _width + _width) % _width;
@@ -187,44 +223,6 @@ namespace LitePlanet.Worlds
             if (ry < 0 || ry >= _tHeight)
                 return null;
             return _tiles[x, ry];
-        }
-
-        public IEnumerable<ITile> GetTiles(RectangleF cBounds)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal void GenerateStaticBodies(Engine engine, int xMin, int yMin)
-        {
-            int width=30;
-            int height=30;
-            yMin-=15;
-            xMin-=15;
-            for (int py = yMin; py < yMin + height; py++)
-                for (int px = xMin; px < xMin + width; px++)
-                {
-                    int x = (px % _width + _width) % _width;
-                    int y = py;
-                    WorldTile tile = GetTile(x, y);
-                    if (tile == null)
-                        continue;
-                    if (tile.Health <= 0)
-                        continue;
-                    //calculate the four corner positions in world space
-                    Vector2 c1 = PolarToCartesian(new Vector2(x, y));
-                    Vector2 c2 = PolarToCartesian(new Vector2(x, y + 1));
-                    Vector2 c3 = PolarToCartesian(new Vector2(x + 1, y));
-                    Vector2 c4 = PolarToCartesian(new Vector2(x + 1, y + 1));
-                    tile.SetBody(engine.Physics, new Vector2[] { c1, c2, c4, c3 });
-                }
-        }
-
-        public int Radius 
-        {
-            get
-            {
-                return _height;
-            }
         }
     }
 
@@ -236,72 +234,5 @@ namespace LitePlanet.Worlds
         Gold,
         Lava,
         Sky
-    }
-
-    public class WorldTile : IPhysicsObject, IDamageSink
-    {
-        Body _body;
-        Planet _planet;
-        PhysicsCore _physics;
-        WorldTileType _type;
-        public WorldTile(Planet planet, WorldTileType type)
-        {
-            _planet = planet;
-            _type = type;
-        }
-
-        public WorldTileType Type
-        {
-            get
-            {
-                return _type;
-            }
-        }
-
-        public void SetBody(PhysicsCore physics, Vector2[] vertices)
-        {
-            _physics = physics;
-            if (_body == null && Health > 0)
-            {
-                _body = physics.CreateBody(this);
-                _body.Restitution = -0.5f;
-                _body.Friction = 0f;
-                _body.IsStatic = true;
-                Vertices v = new Vertices(vertices);
-                FixtureFactory.AttachPolygon(v, 1, _body, null);
-            }
-        }
-
-        public Body Body
-        {
-            get 
-            {
-                return _body;
-            }
-        }
-
-        public void OnCollideWith(IPhysicsObject self, IPhysicsObject other, float impulse)
-        {
-
-        }
-
-        public void TakeDamage(int damageAmount)
-        {
-            if (damageAmount < 1)
-                return;
-            if (Type == WorldTileType.Gold || Type == WorldTileType.Lava || Type == WorldTileType.SolidRock || Type == WorldTileType.Sky)
-                return;
-            if (Health == 0)
-                return;
-            Health = 0;
-            _planet.Dirty = true;
-            if (_body != null)
-            {
-                _physics.RemoveBody(_body);
-                _body = null;
-            }
-        }
-
-        public int Health = 5;
     }
 }
