@@ -50,7 +50,7 @@ namespace LitePlanet.Vessels
             if (other)
                 _hostile = true;
             if (_hostile)
-                _hull = 50;
+                _hull = 5000;
         }
 
         public Body Body
@@ -137,9 +137,9 @@ namespace LitePlanet.Vessels
             _body.ApplyForce(Facing * amount);
             float len = _body.LinearVelocity.LengthSquared();
 
-            float maxSpeed = 240;
+            float maxSpeed = 140;
             if (_hostile)
-                maxSpeed = 360;
+                maxSpeed = 160;
             if (len > maxSpeed)
                 _body.LinearVelocity *= maxSpeed / len;
             int max = 0;
@@ -154,13 +154,13 @@ namespace LitePlanet.Vessels
                 Vector2 vel = Velocity - Facing * 5.1f;
                 vel.X += Dice.Next() * 1.6f - 0.8f;
                 vel.Y += Dice.Next() * 1.6f - 0.8f;
-                //Particle exhaust = _engine.ExhaustParticles.CreateParticle(Position, vel, 50);
-                //if (exhaust == null)
-                //    break;
-                //exhaust.Body.CollidesWith = Category.Cat1;
-                //exhaust.Body.CollisionCategories = Category.Cat6;
-                //Vector2 p = Position - Facing * 0.7f + Dice.RandomVector(0.3f);
-                //_engine.SmokeParticles.CreateParticle(p, Velocity * 0, 50);
+                Particle exhaust = _engine.ExhaustParticles.CreateParticle(Position, vel, 50);
+                if (exhaust == null)
+                    break;
+                exhaust.Body.CollidesWith = Category.Cat1;
+                exhaust.Body.CollisionCategories = Category.Cat6;
+                Vector2 p = Position - Facing * 0.7f + Dice.RandomVector(0.3f);
+                _engine.SmokeParticles.CreateParticle(p, Velocity * 0, 50);
             }
         }
 
@@ -225,7 +225,7 @@ namespace LitePlanet.Vessels
         {
             get 
             {
-                return 15;
+                return 25;
             }
         }
     }

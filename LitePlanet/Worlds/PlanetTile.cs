@@ -103,6 +103,8 @@ namespace LitePlanet.Worlds
         }
 
         public int Health = 5;
+
+        public bool Visible { get; set; }
     }
 
     /// <summary>

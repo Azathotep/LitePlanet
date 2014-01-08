@@ -111,6 +111,7 @@ namespace LitePlanet.Worlds
                     PlanetTile tile = GetTile(x, y);
                     if (tile == null)
                         continue;
+
                     //calculate the four corner positions in world space
                     Vector2 c1 = PolarToCartesian(new Vector2(x, y));
                     Vector2 c2 = PolarToCartesian(new Vector2(x, y + 1));
@@ -168,6 +169,9 @@ namespace LitePlanet.Worlds
                                 break;
                         }
                     }
+
+                    if (!tile.Visible)
+                        color = Color.Black;
 
                     //if (tile.CollisionBody._useCount == 1)
                     //    color = Color.Red;

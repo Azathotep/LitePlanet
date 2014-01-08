@@ -14,6 +14,7 @@ using LiteEngine.Core;
 using LiteEngine.Math;
 using LiteEngine.Particles;
 using LiteEngine.Rendering;
+using LiteEngine.Fov;
 using LitePlanet.Worlds;
 using LitePlanet.Vessels;
 using LitePlanet.Effects;
@@ -28,6 +29,7 @@ namespace LitePlanet
         LiteEngine.Textures.Texture _starsTexture = new LiteEngine.Textures.Texture("stars");
         LiteEngine.Textures.Texture _planetTexture = new LiteEngine.Textures.Texture("planet");
 
+        RecursiveShadowcast _fov = new RecursiveShadowcast();
         ParticlePool _exhaustParticles;
         ParticlePool _smokeParticles;
         Bullets _bullets;
@@ -64,10 +66,10 @@ namespace LitePlanet
             //_dock = new Dock(this);
             //_dock.Position = new Vector2(-20, 7);
 
-            for (int i = 0; i < 25; i++)
+            for (int i = 0; i < 0; i++)
             {
                 Ship aiShip = new Ship(this, true);
-                aiShip.Position = new Vector2(_ship.Position.X - 100 + i * 2, _ship.Position.Y + 60);
+                aiShip.Position = new Vector2(_ship.Position.X + 60 + i * 2, _ship.Position.Y + 30);
                 aiShip.Body.Rotation = 1f;
                 Pilot pilot = new Pilot(aiShip);
                 _aiShips.Add(aiShip);
@@ -145,9 +147,29 @@ namespace LitePlanet
 
         protected override void UpdateFrame(GameTime gameTime, XnaKeyboardHandler keyHandler)
         {
+            Vector2 eye = _planet.CartesianToPolar(_ship.Position);
+            _fov.GetFov(new Vector2I((int)Math.Floor(eye.X), (int)Math.Floor(eye.Y)), 30, blockLightCallback, visibleTileCallback);
+
             _planet.CollisionFieldGenerator.UpdateFields();
             foreach (Pilot p in _aiPilots)
                 p.Target(this, _ship);
+        }
+
+        private void visibleTileCallback(Vector2I position)
+        {
+            PlanetTile tile = _planet.GetTile(position.X, position.Y);
+            if (tile != null)
+                tile.Visible = true;
+        }
+
+        private bool blockLightCallback(Vector2I position)
+        {
+            PlanetTile tile = _planet.GetTile(position.X, position.Y);
+            if (tile == null)
+                return false;
+            if (tile.Health == 0)
+                return false;
+            return true;
         }
 
         float fx = 0;
