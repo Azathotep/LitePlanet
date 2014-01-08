@@ -29,7 +29,7 @@ namespace LitePlanet
         LiteEngine.Textures.Texture _starsTexture = new LiteEngine.Textures.Texture("stars");
         LiteEngine.Textures.Texture _planetTexture = new LiteEngine.Textures.Texture("planet");
 
-        RecursiveShadowcast _fov = new RecursiveShadowcast();
+        PlanetFovHandler _fov;
         ParticlePool _exhaustParticles;
         ParticlePool _smokeParticles;
         Bullets _bullets;
@@ -60,6 +60,7 @@ namespace LitePlanet
             _ship.Rotation = (float)Math.PI;
             _planet.CollisionFieldGenerator.RegisterCollisionField(_ship);
 
+            _fov = new PlanetFovHandler(_planet);
             //_building = new Building(this, new Vector2(-10, 22), 6, 6);
             //_building2 = new Building(this, new Vector2(10, 22), 6, 6);
             
@@ -148,28 +149,11 @@ namespace LitePlanet
         protected override void UpdateFrame(GameTime gameTime, XnaKeyboardHandler keyHandler)
         {
             Vector2 eye = _planet.CartesianToPolar(_ship.Position);
-            _fov.GetFov(new Vector2I((int)Math.Floor(eye.X), (int)Math.Floor(eye.Y)), 30, blockLightCallback, visibleTileCallback);
+            _fov.RunFov((int)Math.Floor(eye.X), (int)Math.Floor(eye.Y), 30);
 
             _planet.CollisionFieldGenerator.UpdateFields();
             foreach (Pilot p in _aiPilots)
                 p.Target(this, _ship);
-        }
-
-        private void visibleTileCallback(Vector2I position)
-        {
-            PlanetTile tile = _planet.GetTile(position.X, position.Y);
-            if (tile != null)
-                tile.Visible = true;
-        }
-
-        private bool blockLightCallback(Vector2I position)
-        {
-            PlanetTile tile = _planet.GetTile(position.X, position.Y);
-            if (tile == null)
-                return false;
-            if (tile.Health == 0)
-                return false;
-            return true;
         }
 
         float fx = 0;
