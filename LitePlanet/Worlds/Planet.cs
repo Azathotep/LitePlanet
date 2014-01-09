@@ -11,6 +11,7 @@ using LiteEngine.Rendering;
 using LiteEngine.Math;
 using LiteEngine.Physics;
 using LitePlanet.Projectiles;
+using LiteEngine.Procedural;
 
 namespace LitePlanet.Worlds
 {
@@ -28,6 +29,7 @@ namespace LitePlanet.Worlds
 
         /// <summary>
         /// Constructor
+        /// 
         /// </summary>
         /// <param name="radius">radius of planet in tiles</param>
         public Planet(PhysicsCore physics, int radius)
@@ -37,6 +39,14 @@ namespace LitePlanet.Worlds
             _width = 1800;
             _height = radius;
             _tiles = new PlanetTile[_width, _tHeight];
+
+
+            NoiseField noise = new NoiseField(_width, _tHeight);
+            noise.GenerateRandomNoise();
+            NoiseField nf = noise.GenerateOctave(0.5f, 2f);
+            nf.Add(noise.GenerateOctave(0.1f, 8f));
+            nf.Normalize();
+
             for (int y = 0; y < _tHeight; y++)
                 for (int x = 0; x < _width; x++)
                 {
@@ -54,6 +64,9 @@ namespace LitePlanet.Worlds
                             type = WorldTileType.Gold;
 
                     _tiles[x, y] = new PlanetTile(this, x, _height - _tHeight + y, type);
+
+                    if (nf.Values[x, y] < 0.4f)
+                        _tiles[x, y].Health = 0;
                 }
         }
 
@@ -119,7 +132,7 @@ namespace LitePlanet.Worlds
                     Vector2 c4 = PolarToCartesian(new Vector2(x + 1, y + 1));
 
                     Color color = Color.White;
-                    bool destroyed = tile.Health == 0;
+                    bool destroyed = tile.Health <= 0;
                     bool dirt = y == _height;
                     bool lava = y < _height - _tHeight;
                     float tx = 0;

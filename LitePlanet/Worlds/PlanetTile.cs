@@ -122,6 +122,8 @@ namespace LitePlanet.Worlds
 
         void CreateBody()
         {
+            if (_tile.Planet == null)
+                return;
             PhysicsCore physics = _tile.Planet.Physics;
             _body = physics.CreateBody(_tile);
             _body.Restitution = -0.5f;
