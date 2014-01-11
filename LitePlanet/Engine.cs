@@ -45,7 +45,7 @@ namespace LitePlanet
         {
             Physics.SetGlobalGravity(new Vector2(0f, 0f));
 
-            GravityController gc = new GravityController(0, 10000, 1);
+            GravityController gc = new GravityController(1500, 10000, 1);
             gc.Enabled =
                 true;
             gc.AddPoint(new Vector2(0, 0));

@@ -25,7 +25,7 @@ namespace LitePlanet.Worlds
         CollisionFieldGenerator _collisionFieldGenerator;
 
         public bool Dirty = true;
-        int _tHeight = 100;
+        int _crustDepth = 100;
 
         /// <summary>
         /// Constructor
@@ -36,34 +36,33 @@ namespace LitePlanet.Worlds
         {
             _physics = physics;
             _collisionFieldGenerator = new CollisionFieldGenerator(this);
-            _width = 1800;
+
+            _width = (int)(radius * Math.PI);
             _height = radius;
-            _tiles = new PlanetTile[_width, _tHeight];
+            _tiles = new PlanetTile[_width, _crustDepth];
 
-
-            NoiseField noise = new NoiseField(_width, _tHeight);
+            NoiseField noise = new NoiseField(_width, _crustDepth);
             noise.GenerateRandomNoise();
-            NoiseField nf = noise.GenerateOctave(0.5f, 2f);
-            nf.Add(noise.GenerateOctave(0.1f, 8f));
+            NoiseField nf = noise.GenerateOctave(0.1f, 8f);
+            nf.Add(noise.GenerateOctave(0.8f, 1f));
             nf.Normalize();
 
-            for (int y = 0; y < _tHeight; y++)
+            for (int y = 0; y < _crustDepth; y++)
                 for (int x = 0; x < _width; x++)
                 {
                     WorldTileType type = WorldTileType.Rock;
-
-                    if (y == _tHeight - 1)
+                    if (y == _crustDepth - 1)
                         type = WorldTileType.Earth;
 
-                    if (y < _tHeight - 1)
+                    if (y < _crustDepth - 1)
                         if (LiteEngine.Core.Dice.Next(30) == 0)
                             type = WorldTileType.SolidRock;
 
-                    if (y < _tHeight - 10)
+                    if (y < _crustDepth - 10)
                         if (LiteEngine.Core.Dice.Next(1500) == 0)
                             type = WorldTileType.Gold;
 
-                    _tiles[x, y] = new PlanetTile(this, x, _height - _tHeight + y, type);
+                    _tiles[x, y] = new PlanetTile(this, x, _height - _crustDepth + y, type);
 
                     if (nf.Values[x, y] < 0.4f)
                         _tiles[x, y].Health = 0;
@@ -134,7 +133,7 @@ namespace LitePlanet.Worlds
                     Color color = Color.White;
                     bool destroyed = tile.Health <= 0;
                     bool dirt = y == _height;
-                    bool lava = y < _height - _tHeight;
+                    bool lava = y < _height - _crustDepth;
                     float tx = 0;
                     float ty = 0;
                     float tw = 0.22f;
@@ -234,10 +233,10 @@ namespace LitePlanet.Worlds
             if (y < 0 || y >= _height)
                 return null;
             x = (x % _width + _width) % _width;
-            if (y < _height - _tHeight)
+            if (y < _height - _crustDepth)
                 return _lavaTile;
-            int ry = y - (_height - _tHeight);
-            if (ry < 0 || ry >= _tHeight)
+            int ry = y - (_height - _crustDepth);
+            if (ry < 0 || ry >= _crustDepth)
                 return null;
             return _tiles[x, ry];
         }
