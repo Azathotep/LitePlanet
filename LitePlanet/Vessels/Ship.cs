@@ -176,7 +176,7 @@ namespace LitePlanet.Vessels
             Texture texture = _texture;
             if (_hostile)
                 texture = _redTexture;
-            renderer.DrawSprite(texture, new RectangleF(Position.X, Position.Y, 1f, 1f), Rotation);
+            renderer.DrawSprite(texture, Position, new Vector2(1f, 1f), Rotation);
 
             if (renderer.Camera.Zoom > 3)
             {
@@ -185,10 +185,10 @@ namespace LitePlanet.Vessels
                 Color c = Color.FromNonPremultiplied(0, 255, 0, 255);
                 if (_hostile)
                     c = Color.FromNonPremultiplied(255, 0, 0, 255);
-                renderer.DrawSprite(_circleTexture, new RectangleF(Position.X, Position.Y, width, width), 0, c, 1f);
+                renderer.DrawSprite(_circleTexture, Position, new Vector2(width, width), 0f, c, 1f);
 
                 Vector2 front = Position + Facing * 2;
-                renderer.DrawSprite(_circleTexture, new RectangleF(front.X, front.Y - 0.5f, width * 0.2f, width * 2), Rotation, c, 1f);
+                renderer.DrawSprite(_circleTexture, new Vector2(front.X, front.Y - 0.5f), new Vector2(width * 0.2f, width * 2), Rotation, c, 1f);
             }
         }
 

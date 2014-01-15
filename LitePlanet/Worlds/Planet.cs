@@ -69,6 +69,8 @@ namespace LitePlanet.Worlds
                 }
         }
 
+        public Vector2 SystemCoordinates;
+
         public CollisionFieldGenerator CollisionFieldGenerator
         {
             get

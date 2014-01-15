@@ -21,6 +21,7 @@ using LitePlanet.Effects;
 using LitePlanet.Weapons;
 using LitePlanet.Projectiles;
 using LitePlanet.AI;
+using LitePlanet.Maps;
 
 namespace LitePlanet
 {
@@ -40,6 +41,8 @@ namespace LitePlanet
         Dock _dock;
         Building _building;
         Building _building2;
+        StarSystem _system;
+        SystemMap _systemMap;
 
         protected override void Initialize()
         {
@@ -61,6 +64,28 @@ namespace LitePlanet
             _planet.CollisionFieldGenerator.RegisterCollisionField(_ship);
 
             _fov = new PlanetFovHandler(_planet);
+
+            _planet.SystemCoordinates = new Vector2(10, 4);
+
+            _system = new StarSystem();
+            PlanetInfo planetInfo = new PlanetInfo();
+            planetInfo.Name = "Gildatrop";
+            planetInfo.Description = "A world known for it's vast natural underground caverns. Popular with miners in search of gold.";
+            planetInfo.SurfaceColor = Color.Green;
+            planetInfo.AtmosphereColor = Color.White;
+            planetInfo.AtmosphereAlpha = 0.5f;
+            planetInfo.SystemCoordinates = new Vector2(2, 4);
+            _system.AddPlanet(planetInfo);
+            planetInfo = new PlanetInfo();
+            planetInfo.Name = "Platimus II";
+            planetInfo.Description = "A largely unnotable world used as a hub for nearby asteroid mining.";
+            planetInfo.AtmosphereAlpha = 0.2f;
+            planetInfo.AtmosphereColor = Color.Black;
+            planetInfo.SystemCoordinates = new Vector2(-4,-3);
+            _system.AddPlanet(planetInfo);
+
+            _systemMap = new SystemMap(_system);
+
             //_building = new Building(this, new Vector2(-10, 22), 6, 6);
             //_building2 = new Building(this, new Vector2(10, 22), 6, 6);
             
@@ -83,6 +108,8 @@ namespace LitePlanet
             Renderer.Camera.LookAt(new Vector2(0, 0));
             base.Initialize();
         }
+
+        bool _mapMode = false;
 
         public ParticlePool SmokeParticles
         {
@@ -112,6 +139,15 @@ namespace LitePlanet
 
         protected override int OnKeyPress(Keys key, GameTime gameTime)
         {
+            if (_mapMode)
+            {
+                if (key == Keys.Escape || key == Keys.M)
+                {
+                    _mapMode = false;
+                    return 10;
+                }
+                return _systemMap.OnKeyPress(key);
+            }
             switch (key)
             {
                 case Keys.Escape:
@@ -129,15 +165,18 @@ namespace LitePlanet
                 case Keys.Right:
                     _ship.ApplyRotateThrust(0.1f);
                     break;
+                case Keys.M:
+                    _mapMode = !_mapMode;
+                    return 10;
                 case Keys.C:
                     _freeCamera = !_freeCamera;
                     return 10;
-                case Keys.N:
-                    Renderer.Camera.ChangeZoom(Renderer.Camera.Zoom * 1.05f);
-                    break;
-                case Keys.M:
-                    Renderer.Camera.ChangeZoom(Renderer.Camera.Zoom * 0.95f);
-                    break;
+                //case Keys.N:
+                //    Renderer.Camera.ChangeZoom(Renderer.Camera.Zoom * 1.05f);
+                //    break;
+                //case Keys.M:
+                //    Renderer.Camera.ChangeZoom(Renderer.Camera.Zoom * 0.95f);
+                //    break;
                 case Keys.Space:
                     _ship.PrimaryWeapon.Fire(this, _ship, _ship.Position, _ship.Facing);
                     break;
@@ -162,6 +201,14 @@ namespace LitePlanet
         Vector2I _shipPos;
         protected override void DrawFrame(GameTime gameTime)
         {
+            Renderer.Clear(Color.Black);
+            if (_mapMode)
+            {
+                _systemMap.Draw(Renderer);
+                return;
+            }
+
+
             if (_planet.Dirty)
             {
                 Vector2 v = _planet.CartesianToPolar(Renderer.Camera.Position);
@@ -187,9 +234,6 @@ namespace LitePlanet
             float angle = (float)Math.Atan2(_ship.Position.X, -_ship.Position.Y);
             if (!_freeCamera)
                 Renderer.Camera.LookAt(_ship.Position, angle);
-
-            Renderer.Clear(Color.Black);
-
 
             if (cloudLeft)
                 fx += 0.05f;
