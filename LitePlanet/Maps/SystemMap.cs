@@ -62,19 +62,30 @@ namespace LitePlanet.Maps
             renderer.DrawStringBox("System #1", new RectangleF(0, 0, 100, 10), Color.White);
 
 
-            float x = 50;
+            float x = 100;
             foreach (PlanetInfo planet in _system.Planets)
             {
-                renderer.DrawSprite(_starTexture, new Vector2(x, 15), new Vector2(20f, 20f), 0);
-                x += 20;
+                planet.DrawImage(renderer, new Vector2(x, 15), 20f);
+                x += 30;
             }
 
             SelectedPlanet.DrawImage(renderer, new Vector2(1000, 150), 200f);
 
             renderer.DrawStringBox(SelectedPlanet.Name, new RectangleF(900, 260, 300, 10), Color.White);
-            renderer.DrawStringBox(SelectedPlanet.Description, new RectangleF(900, 280, 300, 200), Color.White);
+            renderer.DrawStringBox(SelectedPlanet.Description, new RectangleF(900, 300, 300, 200), Color.White);
+
+            renderer.DrawStringBox("[T] Set as Target", new RectangleF(900, 280, 300, 10), Color.White);
 
             renderer.EndDraw();
+        }
+
+        PlanetInfo _target = null;
+        public PlanetInfo Target
+        {
+            get
+            {
+                return _target;
+            }
         }
 
         internal int OnKeyPress(Keys key)
@@ -85,6 +96,9 @@ namespace LitePlanet.Maps
                     _selectedPlanetIndex++;
                     if (_selectedPlanetIndex >= _system.Planets.Count)
                         _selectedPlanetIndex = 0;
+                    return -1;
+                case Keys.T:
+                    _target = SelectedPlanet;
                     return -1;
             }
             return 0;

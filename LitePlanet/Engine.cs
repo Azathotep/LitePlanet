@@ -84,6 +84,16 @@ namespace LitePlanet
             planetInfo.SystemCoordinates = new Vector2(-4,-3);
             _system.AddPlanet(planetInfo);
 
+            planetInfo = new PlanetInfo();
+            planetInfo.Name = "Icarus";
+            planetInfo.Description = "";
+            planetInfo.AtmosphereColor = Color.Black;
+            planetInfo.AtmosphereAlpha = 0.3f;
+            planetInfo.SurfaceColor = Color.DarkRed;
+            planetInfo.SystemCoordinates = new Vector2(4f, -9);
+            _system.AddPlanet(planetInfo);
+
+
             _systemMap = new SystemMap(_system);
 
             //_building = new Building(this, new Vector2(-10, 22), 6, 6);
@@ -171,6 +181,13 @@ namespace LitePlanet
                 case Keys.C:
                     _freeCamera = !_freeCamera;
                     return 10;
+                case Keys.J:
+                    float altitude = _ship.Position.Length() - _planet.Radius;
+                    if (altitude > 0 && _systemMap.Target != null)
+                    {
+                        _ship.Jump(true);
+                    }
+                    return 10;
                 //case Keys.N:
                 //    Renderer.Camera.ChangeZoom(Renderer.Camera.Zoom * 1.05f);
                 //    break;
@@ -181,7 +198,6 @@ namespace LitePlanet
                     _ship.PrimaryWeapon.Fire(this, _ship, _ship.Position, _ship.Facing);
                     break;
             }
-
             return base.OnKeyPress(key, gameTime);
         }
 
@@ -193,6 +209,8 @@ namespace LitePlanet
             _planet.CollisionFieldGenerator.UpdateFields();
             foreach (Pilot p in _aiPilots)
                 p.Target(this, _ship);
+
+            _ship.Update();
         }
 
         float fx = 0;
@@ -207,7 +225,6 @@ namespace LitePlanet
                 _systemMap.Draw(Renderer);
                 return;
             }
-
 
             if (_planet.Dirty)
             {
@@ -317,6 +334,10 @@ namespace LitePlanet
             Renderer.DrawStringBox("Fuel: " + _ship.Fuel, new RectangleF(10, 30, 120, 10), Color.White);
             Renderer.DrawStringBox("Hull: " + _ship.Hull, new RectangleF(10, 50, 120, 10), Color.White);
             Renderer.DrawStringBox("Altitude: " + (_ship.Position.Length() - _planet.Radius), new RectangleF(11, 71, 200, 10), Color.White);
+            
+            if (_ship.JumpDriveCharging)
+                Renderer.DrawStringBox("Jump Drive Charging (destination: " + _systemMap.Target.Name + "): " + _ship.JumpDriveCharge.ToString("0.00") + "%", new RectangleF(11, 91, 500, 10), Color.Red);
+            
             Renderer.EndDraw();
         }
 

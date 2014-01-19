@@ -27,30 +27,33 @@ namespace LitePlanet.Vessels
         static Texture _redTexture = new Texture("redship");
         static Texture _circleTexture = new Texture("circleOverlay");
         
-        Engine _engine;
+        protected Engine _engine;
         bool _hostile;
         public Ship(Engine engine, bool other=false)
         {
             _engine = engine;
-            _body = engine.Physics.CreateBody(this);
-            _body.BodyType = BodyType.Dynamic;
-            _body.AngularDamping = 0.5f;
-            _body.Friction = 0f;
-            _body.Restitution = 1.1f;
-            _body.Mass = 0.5f;
-            _body.Rotation = 0f;
-            _body.LinearVelocity = new Vector2(0, 5);
-            FixtureFactory.AttachPolygon(new Vertices(new Vector2[] { new Vector2(0f, -0.4f), new Vector2(0.35f, 0.4f), new Vector2(-0.35f, 0.4f) }), 1f, _body);
-
-            _body.CollisionCategories = Category.Cat2;
-            _body.CollidesWith = Category.Cat1 | Category.Cat2;
-            
             _cannon = new Cannon();
-
+            _body = CreateBody();
             if (other)
                 _hostile = true;
             if (_hostile)
                 _hull = 5000;
+        }
+
+        protected virtual Body CreateBody()
+        {
+            Body body = _engine.Physics.CreateBody(this);
+            body.BodyType = BodyType.Dynamic;
+            body.AngularDamping = 0.5f;
+            body.Friction = 0f;
+            body.Restitution = 1.1f;
+            body.Mass = 0.5f;
+            body.Rotation = 0f;
+            body.LinearVelocity = new Vector2(0, 5);
+            FixtureFactory.AttachPolygon(new Vertices(new Vector2[] { new Vector2(0f, -0.4f), new Vector2(0.35f, 0.4f), new Vector2(-0.35f, 0.4f) }), 1f, body);
+            body.CollisionCategories = Category.Cat2;
+            body.CollidesWith = Category.Cat1 | Category.Cat2;
+            return body;
         }
 
         public Body Body
@@ -70,13 +73,36 @@ namespace LitePlanet.Vessels
         }
 
 
-        int _hull = 2000;
+        protected int _hull = 2000;
         public int Hull
         {
             get
             {
                 return _hull;
             }
+        }
+
+        float _jumpCharge = 0;
+        public float JumpDriveCharge
+        {
+            get
+            {
+                return _jumpCharge;
+            }
+        }
+
+        public bool JumpDriveCharging
+        {
+            get
+            {
+                return _jumpDriveOn;
+            }
+        }
+
+        bool _jumpDriveOn = false;
+        public void Jump(bool on)
+        {
+            _jumpDriveOn = on;
         }
 
         int _fuel = 5500;
@@ -169,7 +195,7 @@ namespace LitePlanet.Vessels
             _body.ApplyTorque(amount);
         }
 
-        public void Draw(XnaRenderer renderer)
+        public virtual void Draw(XnaRenderer renderer)
         {
             if (_hull <= 0)
                 return;
@@ -226,6 +252,14 @@ namespace LitePlanet.Vessels
             get 
             {
                 return 25;
+            }
+        }
+
+        internal void Update()
+        {
+            if (_jumpDriveOn)
+            {
+                _jumpCharge += 0.1f;
             }
         }
     }

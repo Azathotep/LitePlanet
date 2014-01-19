@@ -42,6 +42,7 @@
     <Compile Include="Maps\SystemMap.cs" />
     <Compile Include="Projectiles\Bullets.cs" />
     <Compile Include="Projectiles\IDamageSink.cs" />
+    <Compile Include="Vessels\Carrier.cs" />
     <Compile Include="Vessels\Ship.cs" />
     <Compile Include="Weapons\Cannon.cs" />
     <Compile Include="Worlds\CollisionFieldGenerator.cs" />
