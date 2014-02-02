@@ -14,10 +14,6 @@ namespace LitePlanet.Worlds
     {
         RecursiveShadowcast _fov = new RecursiveShadowcast();
         Planet _planet;
-        public PlanetFovHandler(Planet planet)
-        {
-            _planet = planet;
-        }
 
         public bool TileBlocksLight(int x, int y)
         {
@@ -36,8 +32,9 @@ namespace LitePlanet.Worlds
                 tile.Visible = true;
         }
 
-        public void RunFov(int x, int y, int viewRadius)
+        public void RunFov(Planet planet, int x, int y, int viewRadius)
         {
+            _planet = planet;
             _fov.CalculateFov(new Vector2I(x, y), viewRadius, this);
         }
     }

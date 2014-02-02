@@ -25,7 +25,6 @@ namespace LitePlanet.Vessels
         static Texture _redTexture = new Texture("redship");
         static Texture _circleTexture = new Texture("circleOverlay");
         
-        bool _hostile;
         public Carrier(Engine engine) : base(engine)
         {
             
@@ -53,8 +52,6 @@ namespace LitePlanet.Vessels
             if (_hull <= 0)
                 return;
             Texture texture = _texture;
-            if (_hostile)
-                texture = _redTexture;
             renderer.DrawSprite(texture, Position, new Vector2(1f, 1f), Rotation);
             renderer.DrawSprite(texture, Position - Facing * 0.8f, new Vector2(1f, 1f), Rotation + (float)Math.PI);
         }

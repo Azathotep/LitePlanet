@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using FarseerPhysics.Common;
 using FarseerPhysics.Dynamics;
 using FarseerPhysics.Factories;
@@ -12,14 +11,24 @@ using LiteEngine.Math;
 using LiteEngine.Physics;
 using LitePlanet.Projectiles;
 using LiteEngine.Procedural;
+using LiteEngine.Textures;
 
 namespace LitePlanet.Worlds
 {
     public class Planet
     {
+        static Texture _basePlanetTexture = new Texture("planets", new RectangleI(0, 0, 128, 128));
+        static Texture _cloudPlanetTexture = new Texture("planets", new RectangleI(128, 0, 128, 128));
+
         LiteEngine.Textures.Texture _grassTexture = new LiteEngine.Textures.Texture("brownplanet");
         int _width = 100;
         int _height;
+
+        public string Name;
+        public string Description;
+        public Color SurfaceColor = Color.Gray;
+        public Color AtmosphereColor = Color.White;
+        public float AtmosphereAlpha = 0f;
 
         PlanetTile[,] _tiles;
         CollisionFieldGenerator _collisionFieldGenerator;
@@ -27,18 +36,27 @@ namespace LitePlanet.Worlds
         public bool Dirty = true;
         int _crustDepth = 100;
 
+        public List<Planet> Moons = new List<Planet>();
+
         /// <summary>
         /// Constructor
-        /// 
         /// </summary>
         /// <param name="radius">radius of planet in tiles</param>
-        public Planet(PhysicsCore physics, int radius)
+        public Planet(PhysicsCore physics, Vector2 position, int radius)
         {
             _physics = physics;
-            _collisionFieldGenerator = new CollisionFieldGenerator(this);
-
+            _position = position;
             _width = (int)(radius * Math.PI);
             _height = radius;
+            if (_physics != null)
+            {
+                _collisionFieldGenerator = new CollisionFieldGenerator(this);
+                GenerateGeometry();
+            }
+        }
+
+        void GenerateGeometry()
+        {
             _tiles = new PlanetTile[_width, _crustDepth];
 
             NoiseField noise = new NoiseField(_width, _crustDepth);
@@ -69,7 +87,14 @@ namespace LitePlanet.Worlds
                 }
         }
 
-        public Vector2 SystemCoordinates;
+        Vector2 _position;
+        public Vector2 Position
+        {
+            get
+            {
+                return _position;
+            }
+        }
 
         public CollisionFieldGenerator CollisionFieldGenerator
         {
@@ -77,6 +102,14 @@ namespace LitePlanet.Worlds
             {
                 return _collisionFieldGenerator;
             }
+        }
+
+        public void DrawIcon(XnaRenderer renderer, Vector2 position, float diameter, float alpha = 1)
+        {
+            renderer.DrawDepth = 0.8f;
+            renderer.DrawSprite(_basePlanetTexture, position, new Vector2(diameter, diameter), 0, SurfaceColor, alpha);
+            renderer.DrawDepth = 0.4f;
+            renderer.DrawSprite(_cloudPlanetTexture, position, new Vector2(diameter * 1.1f, diameter * 1.1f), 0, AtmosphereColor, AtmosphereAlpha * alpha);
         }
 
         public int Radius
@@ -98,8 +131,10 @@ namespace LitePlanet.Worlds
 
         public Vector2 CartesianToPolar(Vector2 cCoords)
         {
-            float y = (float)Math.Sqrt(cCoords.X * cCoords.X + cCoords.Y * cCoords.Y);
-            float angle = (float)Math.Atan2(cCoords.X, -cCoords.Y);// +(float)Math.PI;
+            Vector2 relcCoords = cCoords - Position;
+
+            float y = (float)Math.Sqrt(relcCoords.X * relcCoords.X + relcCoords.Y * relcCoords.Y);
+            float angle = (float)Math.Atan2(relcCoords.X, -relcCoords.Y);// +(float)Math.PI;
             //angle is now between 0 and 2.pi
             float x = angle / (2 * (float)Math.PI) * _width;
             return new Vector2(x, y);
@@ -111,12 +146,12 @@ namespace LitePlanet.Worlds
             float radius = polar.Y; // _width / (2f * (float)Math.PI) + polar.Y;
             float px = (float)Math.Sin(angle) * radius;
             float py = -(float)Math.Cos(angle) * radius;
-            return new Vector2(px, py);
+            return new Vector2(px + Position.X, py + Position.Y);
         }
 
         public void GenerateVertexBuffer(Engine engine, XnaRenderer renderer, int xMin, int yMin, int width, int height)
         {
-            List<VertexPositionColorTexture> vl = new List<VertexPositionColorTexture>();
+            List<Microsoft.Xna.Framework.Graphics.VertexPositionColorTexture> vl = new List<Microsoft.Xna.Framework.Graphics.VertexPositionColorTexture>();
             for (int py = yMin; py < yMin + height; py++)
                 for (int px = xMin; px < xMin + width; px++)
                 {
@@ -194,13 +229,13 @@ namespace LitePlanet.Worlds
                     //if (tile.CollisionBody._useCount > 2)
                     //    color = Color.Purple;
 
-                    vl.Add(new VertexPositionColorTexture(new Vector3(c1, 0), color, new Vector2(tx, ty + tw)));
-                    vl.Add(new VertexPositionColorTexture(new Vector3(c2, 0), color, new Vector2(tx, ty)));
-                    vl.Add(new VertexPositionColorTexture(new Vector3(c3, 0), color, new Vector2(tx + tw, ty + tw)));
+                    vl.Add(new Microsoft.Xna.Framework.Graphics.VertexPositionColorTexture(new Vector3(c1, 0), color, new Vector2(tx, ty + tw)));
+                    vl.Add(new Microsoft.Xna.Framework.Graphics.VertexPositionColorTexture(new Vector3(c2, 0), color, new Vector2(tx, ty)));
+                    vl.Add(new Microsoft.Xna.Framework.Graphics.VertexPositionColorTexture(new Vector3(c3, 0), color, new Vector2(tx + tw, ty + tw)));
 
-                    vl.Add(new VertexPositionColorTexture(new Vector3(c3, 0), color, new Vector2(tx + tw, ty + tw)));
-                    vl.Add(new VertexPositionColorTexture(new Vector3(c2, 0), color, new Vector2(tx, ty)));
-                    vl.Add(new VertexPositionColorTexture(new Vector3(c4, 0), color, new Vector2(tx + tw, ty)));
+                    vl.Add(new Microsoft.Xna.Framework.Graphics.VertexPositionColorTexture(new Vector3(c3, 0), color, new Vector2(tx + tw, ty + tw)));
+                    vl.Add(new Microsoft.Xna.Framework.Graphics.VertexPositionColorTexture(new Vector3(c2, 0), color, new Vector2(tx, ty)));
+                    vl.Add(new Microsoft.Xna.Framework.Graphics.VertexPositionColorTexture(new Vector3(c4, 0), color, new Vector2(tx + tw, ty)));
                 }
             _vCount = vl.Count;
             if (vl.Count == 0)
@@ -217,12 +252,21 @@ namespace LitePlanet.Worlds
         int _vCount;
 
 
-        VertexBuffer _vb;
+        Microsoft.Xna.Framework.Graphics.VertexBuffer _vb;
 
         public void Draw(XnaRenderer renderer)
         {
             if (_vb != null)
             renderer.DrawUserPrimitives(_vb, _grassTexture, _vCount / 3);
+        }
+
+        /// <summary>
+        /// Returns the distance of a point from the surface of the planet
+        /// </summary>
+        public float Altitude(Vector2 point)
+        {
+            Vector2 diff = point - Position;
+            return diff.Length() - Radius;
         }
 
         static PlanetTile _lavaTile = new PlanetTile(null, 0, 0, WorldTileType.Lava);
@@ -241,6 +285,11 @@ namespace LitePlanet.Worlds
             if (ry < 0 || ry >= _crustDepth)
                 return null;
             return _tiles[x, ry];
+        }
+
+        internal void Update()
+        {
+            
         }
     }
 
