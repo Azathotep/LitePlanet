@@ -30,6 +30,7 @@ namespace LitePlanet
         LiteEngine.Textures.Texture _starsTexture = new LiteEngine.Textures.Texture("stars");
         LiteEngine.Textures.Texture _planetTexture = new LiteEngine.Textures.Texture("planet");
         LiteEngine.Textures.Texture _pointTexture = new LiteEngine.Textures.Texture("point");
+        LiteEngine.Textures.Texture _particleTexture = new LiteEngine.Textures.Texture("particle");
 
         PlanetFovHandler _fov;
         ParticlePool _exhaustParticles;
@@ -292,7 +293,7 @@ namespace LitePlanet
             }
 
             Renderer.Camera.SetAspect(80, 60);
-            float angle = (float)Math.Atan2(_ship.Position.X - _system.Planets[0].Position.X, -_ship.Position.Y - _system.Planets[0].Position.Y);
+            float angle = 0; // (float)Math.Atan2(_ship.Position.X - _system.Planets[0].Position.X, -_ship.Position.Y - _system.Planets[0].Position.Y);
             if (!_freeCamera)
                 Renderer.Camera.LookAt(_ship.Position, angle);
 
@@ -319,8 +320,14 @@ namespace LitePlanet
                 
                 //Renderer.DrawSprite(_planetTexture, new RectangleF(planet.Position.X, planet.Position.Y, planet.Radius * 2.17f, planet.Radius * 2.17f), 0.2f, 0, new Vector2(0.5f, 0.5f), Color.White, false, false);
 
-                planet.DrawIcon(Renderer, planet.Position, planet.Radius * 2f);
-                
+                //planet.DrawIcon(Renderer, planet.Position, planet.Radius * 2f);
+
+                bool zoomedOut = Renderer.Camera.Zoom > 1;
+                planet.DrawIcon(Renderer, planet.Position, planet.Radius * 2.03f, zoomedOut);
+
+                //Renderer.DrawSprite(_pointTexture, planet.Position, Vector2.One * planet.Radius * 2.5f, 0, Color.White, 0f);
+                //Renderer.DrawSprite(_pointTexture, planet.Position, Vector2.One * planet.Radius * 2.5f, 0, Color.White, 0f);
+
 
                 //Renderer.BeginDraw();
                 //Renderer.DrawSprite(_planetTexture, new RectangleF(10000, 0, 1085, 1085), 0.2f, 0, new Vector2(0.5f, 0.5f), Color.White, false, false);
@@ -355,15 +362,15 @@ namespace LitePlanet
             Renderer.DrawDepth = 0.5f;
             foreach (Particle p in _exhaustParticles.Particles)
             {
-                float particleSize = 0.45f * (p.Life / 50f);
+                float particleSize = 0.8f * (p.Life / 50f);
                 float alpha = (float)p.Life * p.Life / (50 * 50);
                 Color color = new Color(1, 1, (float)p.Life / 60f);
-                p.Draw(Renderer, particleSize, color, alpha);
+                p.Draw(Renderer, particleSize, color, 0); //alpha);
             }
 
             foreach (Particle p in _smokeParticles.Particles)
             {
-                float particleSize = 0.6f;
+                float particleSize = 1.4f;
                 float alpha = (float)p.Life * p.Life / (50 * 50);
                 float c = (float)p.Life / 100;
                 Color color = new Color(c, c, c);
@@ -372,10 +379,16 @@ namespace LitePlanet
 
             foreach (Particle p in _bullets.Particles)
             {
-                float particleSize = 0.4f;
-                float alpha = 0.8f;
-                Color color = Color.Cyan;
+                float particleSize = 0.5f;
+                float alpha = 0f;
+                Color color = Color.Lerp(Color.Cyan, Color.Blue, Dice.Next());
                 p.Draw(Renderer, particleSize, color, alpha);
+
+                particleSize = 0.9f;
+                p.Draw(Renderer, particleSize, color, alpha);
+
+                particleSize = 1.2f;
+                p.Draw(Renderer, particleSize, Color.White, alpha);
             }
 
             //_building.Draw(Renderer);

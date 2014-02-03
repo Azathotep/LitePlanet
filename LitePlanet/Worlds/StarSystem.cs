@@ -23,16 +23,16 @@ namespace LitePlanet.Worlds
             planet.Name = "Planet A";
             planet.Description = "";
             planet.SurfaceColor = Color.Green;
-            planet.AtmosphereColor = Color.White;
+            planet.AtmosphereColor = Color.LightBlue;
             planet.AtmosphereAlpha = 0.5f;
             _planets.Add(planet);
 
-            planet = new Planet(physics, new Vector2(15000, -820), 200);
+            planet = new Planet(physics, new Vector2(15000, -2820), 200);
             planet.Name = "Planet B";
             planet.Description = "";
-            planet.SurfaceColor = Color.Gray;
+            planet.SurfaceColor = Color.DarkGray;
             planet.AtmosphereAlpha = 0.2f;
-            planet.AtmosphereColor = Color.Blue;
+            planet.AtmosphereColor = Color.LightPink;
             _planets.Add(planet);
         }
 

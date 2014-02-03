@@ -53,7 +53,7 @@ namespace LitePlanet.Maps
 
             Planet selectedPlanet = _system.Planets[0];
 
-            _sun.DrawIcon(renderer, Vector2.Zero, 5000f);
+            //_sun.DrawIcon(renderer, Vector2.Zero, 5000f);
 
             foreach (Planet planet in _system.Planets)
             {
@@ -62,7 +62,7 @@ namespace LitePlanet.Maps
                 float planetSize = planet.Radius * 2;
 
                 //if (ZoomCamera.Zoom > 1)
-                planet.DrawIcon(renderer, planet.Position, planetSize, ZoomCamera.Zoom);
+                //planet.DrawIcon(renderer, planet.Position, planetSize, ZoomCamera.Zoom);
 
 
                 //if (ZoomCamera.Zoom < 0.4f)

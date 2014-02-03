@@ -51,7 +51,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Worlds\Building.cs" />
     <Compile Include="Worlds\PlanetFovHandler.cs" />
-    <Compile Include="Worlds\PlanetInfo.cs" />
     <Compile Include="Worlds\PlanetTile.cs" />
     <Compile Include="Worlds\StarSystem.cs" />
   </ItemGroup>

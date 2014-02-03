@@ -20,6 +20,9 @@ namespace LitePlanet.Worlds
         static Texture _basePlanetTexture = new Texture("planets", new RectangleI(0, 0, 128, 128));
         static Texture _cloudPlanetTexture = new Texture("planets", new RectangleI(128, 0, 128, 128));
 
+        static Texture _pointTexture = new Texture("point");
+        static Texture _particleTexture = new Texture("particle");
+
         LiteEngine.Textures.Texture _grassTexture = new LiteEngine.Textures.Texture("brownplanet");
         int _width = 100;
         int _height;
@@ -104,12 +107,20 @@ namespace LitePlanet.Worlds
             }
         }
 
-        public void DrawIcon(XnaRenderer renderer, Vector2 position, float diameter, float alpha = 1)
+        public void DrawIcon(XnaRenderer renderer, Vector2 position, float diameter, bool zoomedOut, float alpha = 1)
         {
-            renderer.DrawDepth = 0.8f;
-            renderer.DrawSprite(_basePlanetTexture, position, new Vector2(diameter, diameter), 0, SurfaceColor, alpha);
-            renderer.DrawDepth = 0.4f;
-            renderer.DrawSprite(_cloudPlanetTexture, position, new Vector2(diameter * 1.1f, diameter * 1.1f), 0, AtmosphereColor, AtmosphereAlpha * alpha);
+            renderer.DrawDepth = 0.5f;
+            renderer.DrawSprite(_particleTexture, Position, Vector2.One * Radius * 2.7f, 0, AtmosphereColor, 1f);
+            renderer.DrawSprite(_pointTexture, Position, Vector2.One * Radius * 2.7f, 0, Color.White, 0f);
+
+
+            if (zoomedOut)
+            {
+                renderer.DrawDepth = 0.2f; // 0.8f;
+                renderer.DrawSprite(_basePlanetTexture, position, new Vector2(diameter, diameter), 0, SurfaceColor, alpha);
+            }
+                //renderer.DrawDepth = 0.4f;
+            //renderer.DrawSprite(_cloudPlanetTexture, position, new Vector2(diameter * 1.1f, diameter * 1.1f), 0, AtmosphereColor, AtmosphereAlpha * alpha);
         }
 
         public int Radius

@@ -163,7 +163,7 @@ namespace LitePlanet.Vessels
             _body.ApplyForce(Facing * amount);
             float len = _body.LinearVelocity.LengthSquared();
 
-            float maxSpeed = 140;
+            float maxSpeed = 14000;
             if (_hostile)
                 maxSpeed = 160;
             if (len > maxSpeed)
