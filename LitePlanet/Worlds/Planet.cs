@@ -58,6 +58,24 @@ namespace LitePlanet.Worlds
             }
         }
 
+        public float MinX(float x1, float x2)
+        {
+            if (x2 > x1 + _width * 0.5f)
+                return x2;
+            if (x2 < x1 - _width * 0.5f)
+                return x1;
+            if (x1 < x2)
+                return x1;
+            return x2;
+        }
+
+        public float MaxX(float x1, float x2)
+        {
+            if (MinX(x1, x2) == x1)
+                return x2;
+            return x1;
+        }
+
         void GenerateGeometry()
         {
             _tiles = new PlanetTile[_width, _crustDepth];
@@ -178,6 +196,10 @@ namespace LitePlanet.Worlds
                     Vector2 c3 = PolarToCartesian(new Vector2(x + 1, y));
                     Vector2 c4 = PolarToCartesian(new Vector2(x + 1, y + 1));
 
+                    if (!renderer.Camera.IsPointOnScreen(c1) && !renderer.Camera.IsPointOnScreen(c2) &&
+                        !renderer.Camera.IsPointOnScreen(c3) && !renderer.Camera.IsPointOnScreen(c4))
+                        continue;
+
                     Color color = Color.White;
                     bool destroyed = tile.Health <= 0;
                     bool dirt = y == _height;
@@ -268,7 +290,7 @@ namespace LitePlanet.Worlds
         public void Draw(XnaRenderer renderer)
         {
             if (_vb != null)
-            renderer.DrawUserPrimitives(_vb, _grassTexture, _vCount / 3);
+                renderer.DrawUserPrimitives(_vb, _grassTexture, _vCount / 3);
         }
 
         /// <summary>
@@ -301,6 +323,14 @@ namespace LitePlanet.Worlds
         internal void Update()
         {
             
+        }
+
+        public float Width
+        {
+            get
+            {
+                return _width;
+            }
         }
     }
 

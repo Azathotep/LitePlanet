@@ -269,18 +269,63 @@ namespace LitePlanet
             if (_nearPlanet == null)
                 _nearPlanet = GetNearPlanet(_ship.Position);
 
+            Renderer.Camera.SetAspect(80, 60);
+            float angle = 0; // (float)Math.Atan2(_ship.Position.X - _system.Planets[0].Position.X, -_ship.Position.Y - _system.Planets[0].Position.Y);
+            if (!_freeCamera)
+                Renderer.Camera.LookAt(_ship.Position, angle);
+            //0; // 
+
+
+            Vector2 pp = Vector2.Zero;
             if (_nearPlanet != null)
             {
+                Vector2 v = _nearPlanet.CartesianToPolar(Renderer.Camera.Position);
+
                 if (_nearPlanet.Dirty)
                 {
-                    Vector2 v = _nearPlanet.CartesianToPolar(Renderer.Camera.Position);
+                    //_nearPlanet.GenerateVertexBuffer(this, Renderer, Renderer.Camera.ViewCorners);
                     int x = (int)v.X - 30;
-                    int y = (int)v.Y - 35;
-                    _nearPlanet.GenerateVertexBuffer(this, Renderer, x, y, 60, 70);
+                    //int y = (int)v.Y - 35;
+                    //_nearPlanet.GenerateVertexBuffer(this, Renderer, x, y, 60, 70);
 
-                    //v = planet.CartesianToPolar(_ship.Position);
+                    float nearestY = 99999f;
+                    float furthestY = 0f;
 
-                    //_planet.GenerateStaticBodies(this, (int)v.X, (int)v.Y);
+                    //use screen corners to restrict what to draw
+                    Vector2[] screenCorners = new Vector2[] {
+                        Renderer.Camera.ScreenToWorld(new Vector2(-1,1)),
+                        Renderer.Camera.ScreenToWorld(new Vector2(1,1)),
+                        Renderer.Camera.ScreenToWorld(new Vector2(1,-1)),
+                        Renderer.Camera.ScreenToWorld(new Vector2(-1,-1))};
+
+                    float minX = -1;
+                    float maxX = -1;
+                    foreach (Vector2 corner in screenCorners)
+                    {
+                        Vector2 polar = _nearPlanet.CartesianToPolar(corner);
+                        nearestY = Math.Min(nearestY, polar.Y);
+                        furthestY = Math.Max(furthestY, polar.Y);
+
+                        float cx = polar.X;
+                        if (cx < 0)
+                            cx += _nearPlanet.Width;
+                        if (minX == -1)
+                        {
+                            minX = cx;
+                            maxX = cx;
+                        }
+                        else
+                        {
+                            minX = _nearPlanet.MinX(minX, cx);
+                            maxX = _nearPlanet.MaxX(maxX, cx);
+                        }
+                    }
+                    int width = (int)maxX - (int)minX;
+                    if (width < 0)
+                        width = (int)(maxX + (_nearPlanet.Width - minX));
+                    int height = (int)furthestY - (int)nearestY;
+                    _nearPlanet.GenerateVertexBuffer(this, Renderer, (int)minX, (int)nearestY - 2, width + 2, height + 2);
+
                     _nearPlanet.Dirty = false;
                 }
 
@@ -292,13 +337,10 @@ namespace LitePlanet
                 }
             }
 
-            Renderer.Camera.SetAspect(80, 60);
-            float angle = 0; // (float)Math.Atan2(_ship.Position.X - _system.Planets[0].Position.X, -_ship.Position.Y - _system.Planets[0].Position.Y);
-            if (!_freeCamera)
-                Renderer.Camera.LookAt(_ship.Position, angle);
-
+            
             DrawStars(Renderer);
 
+            
             //TODO find out why have to call Renderer.BeginDraw()/endDraw() before _planet.Draw() works. Initializing the matrices?
 
                 //new RectangleF(planet.Position.X, planet.Position.Y, planet.Radius * 2.17f, planet.Radius * 2.17f), 0.2f, 0, new Vector2(0.5f, 0.5f), Color.White, false, false);
