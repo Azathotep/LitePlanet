@@ -98,7 +98,7 @@ namespace LitePlanet.Worlds
             if (Health == 0)
                 return;
             Health = 0;
-            _planet.Dirty = true;
+            _planet.UpdateTile(_x, _y, Color.Black);
             _collisionBody.DestroyBody();
         }
 

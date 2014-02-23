@@ -37,7 +37,7 @@ namespace LitePlanet.Vessels
             if (other)
                 _hostile = true;
             if (_hostile)
-                _hull = 5000;
+                _hull = 100;
         }
 
         protected virtual Body CreateBody()
@@ -73,7 +73,7 @@ namespace LitePlanet.Vessels
         }
 
 
-        protected int _hull = 2000;
+        protected int _hull = 300;
         public int Hull
         {
             get
@@ -162,18 +162,13 @@ namespace LitePlanet.Vessels
             _fuel--;
             _body.ApplyForce(Facing * amount);
             float len = _body.LinearVelocity.LengthSquared();
-
-            float maxSpeed = 14000;
+            
+            float maxSpeed = 160;
             if (_hostile)
                 maxSpeed = 160;
             if (len > maxSpeed)
                 _body.LinearVelocity *= maxSpeed / len;
-            int max = 0;
-            if (s > 3)
-            {
-                s = 0;
-                max = 1;
-            }
+            int max = 1;
             s++;
             for (int i = 0; i < max; i++)
             {

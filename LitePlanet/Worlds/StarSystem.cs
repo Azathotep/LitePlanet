@@ -19,11 +19,12 @@ namespace LitePlanet.Worlds
 
         public StarSystem(PhysicsCore physics)
         {
-            Planet planet = new Planet(physics, new Vector2(15000, 0), 500);
+            Planet planet = new Planet(physics, new Vector2(15000, 0), 500, true);
             planet.Name = "Planet A";
             planet.Description = "";
             planet.SurfaceColor = Color.Green;
             planet.AtmosphereColor = Color.LightBlue;
+            planet.RockColor = Color.FromNonPremultiplied(50,50,50,255);
             planet.AtmosphereAlpha = 0.5f;
             _planets.Add(planet);
 
@@ -32,7 +33,8 @@ namespace LitePlanet.Worlds
             planet.Description = "";
             planet.SurfaceColor = Color.DarkGray;
             planet.AtmosphereAlpha = 0.2f;
-            planet.AtmosphereColor = Color.LightPink;
+            planet.AtmosphereColor = Color.Pink;
+            planet.RockColor = Color.White;
             _planets.Add(planet);
         }
 

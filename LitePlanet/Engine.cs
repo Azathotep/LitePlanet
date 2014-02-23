@@ -82,10 +82,10 @@ namespace LitePlanet
             //_dock = new Dock(this);
             //_dock.Position = new Vector2(-20, 7);
 
-            for (int i = 0; i < 0; i++)
+            for (int i = 0; i < 1; i++)
             {
                 Ship aiShip = new Ship(this, true);
-                aiShip.Position = new Vector2(_ship.Position.X + 60 + i * 2, _ship.Position.Y + 30);
+                aiShip.Position = new Vector2(_ship.Position.X + 60 + i * 2, _ship.Position.Y - 30);
                 aiShip.Body.Rotation = 1f;
                 Pilot pilot = new Pilot(aiShip);
                 _aiShips.Add(aiShip);
@@ -171,8 +171,8 @@ namespace LitePlanet
                     break;
                 case Keys.X:
                     float zoom = Renderer.Camera.Zoom * 0.95f;
-                    if (zoom < 1)
-                        zoom = 1;
+                    if (zoom < 0.5f)
+                        zoom = 0.5f;
                     Renderer.Camera.ChangeZoom(zoom);
                     break;
                 case Keys.Space:
@@ -273,133 +273,23 @@ namespace LitePlanet
             float angle = 0; // (float)Math.Atan2(_ship.Position.X - _system.Planets[0].Position.X, -_ship.Position.Y - _system.Planets[0].Position.Y);
             if (!_freeCamera)
                 Renderer.Camera.LookAt(_ship.Position, angle);
-            //0; // 
 
-
-            Vector2 pp = Vector2.Zero;
-            if (_nearPlanet != null)
-            {
-                Vector2 v = _nearPlanet.CartesianToPolar(Renderer.Camera.Position);
-
-                if (_nearPlanet.Dirty)
-                {
-                    //_nearPlanet.GenerateVertexBuffer(this, Renderer, Renderer.Camera.ViewCorners);
-                    int x = (int)v.X - 30;
-                    //int y = (int)v.Y - 35;
-                    //_nearPlanet.GenerateVertexBuffer(this, Renderer, x, y, 60, 70);
-
-                    float nearestY = 99999f;
-                    float furthestY = 0f;
-
-                    //use screen corners to restrict what to draw
-                    Vector2[] screenCorners = new Vector2[] {
-                        Renderer.Camera.ScreenToWorld(new Vector2(-1,1)),
-                        Renderer.Camera.ScreenToWorld(new Vector2(1,1)),
-                        Renderer.Camera.ScreenToWorld(new Vector2(1,-1)),
-                        Renderer.Camera.ScreenToWorld(new Vector2(-1,-1))};
-
-                    float minX = -1;
-                    float maxX = -1;
-                    foreach (Vector2 corner in screenCorners)
-                    {
-                        Vector2 polar = _nearPlanet.CartesianToPolar(corner);
-                        nearestY = Math.Min(nearestY, polar.Y);
-                        furthestY = Math.Max(furthestY, polar.Y);
-
-                        float cx = polar.X;
-                        if (cx < 0)
-                            cx += _nearPlanet.Width;
-                        if (minX == -1)
-                        {
-                            minX = cx;
-                            maxX = cx;
-                        }
-                        else
-                        {
-                            minX = _nearPlanet.MinX(minX, cx);
-                            maxX = _nearPlanet.MaxX(maxX, cx);
-                        }
-                    }
-                    int width = (int)maxX - (int)minX;
-                    if (width < 0)
-                        width = (int)(maxX + (_nearPlanet.Width - minX));
-                    int height = (int)furthestY - (int)nearestY;
-                    _nearPlanet.GenerateVertexBuffer(this, Renderer, (int)minX, (int)nearestY - 2, width + 2, height + 2);
-
-                    _nearPlanet.Dirty = false;
-                }
-
-                if (_ship.Position.X != _shipPos.X || _ship.Position.Y != _shipPos.Y)
-                {
-                    _nearPlanet.Dirty = true;
-                    _shipPos.X = (int)_ship.Position.X;
-                    _shipPos.Y = (int)_ship.Position.Y;
-                }
-            }
-
-            
             DrawStars(Renderer);
 
-            
-            //TODO find out why have to call Renderer.BeginDraw()/endDraw() before _planet.Draw() works. Initializing the matrices?
-
-                //new RectangleF(planet.Position.X, planet.Position.Y, planet.Radius * 2.17f, planet.Radius * 2.17f), 0.2f, 0, new Vector2(0.5f, 0.5f), Color.White, false, false);
-
-
-            Renderer.BeginDraw();
-
-            DrawSun(Renderer);
-                        
-            //Renderer.DrawSprite(_planetTexture, Vector2.Zero, new Vector2(10000, 10000), 0, Color.White, 0);
-            //Renderer.DrawSprite(_planetTexture, Vector2.Zero, new Vector2(10000, 10000), 0, Color.FromNonPremultiplied(100,100, 0, 100), 0.5f);
-            //Renderer.DrawSprite(_planetTexture, Vector2.Zero, new Vector2(10000, 10000), 0, Color.FromNonPremultiplied(100, 100, 0, 200), 0.5f);
-            //Renderer.DrawSprite(_planetTexture, Vector2.Zero, new Vector2(10000, 10000), 0, Color.FromNonPremultiplied(100, 100, 200, 100), 0.5f);
-            
-            //Renderer.DrawSprite(_planetTexture, Vector2.Zero, new Vector2(10000, 10000), 0, Color.White, 0.5f);
-            
             foreach (Planet planet in _system.Planets)
             {
-                
-                //Renderer.DrawSprite(_planetTexture, new RectangleF(planet.Position.X, planet.Position.Y, planet.Radius * 2.17f, planet.Radius * 2.17f), 0.2f, 0, new Vector2(0.5f, 0.5f), Color.White, false, false);
-
-                //planet.DrawIcon(Renderer, planet.Position, planet.Radius * 2f);
-
-                bool zoomedOut = Renderer.Camera.Zoom > 1;
-                planet.DrawIcon(Renderer, planet.Position, planet.Radius * 2.03f, zoomedOut);
-
-                //Renderer.DrawSprite(_pointTexture, planet.Position, Vector2.One * planet.Radius * 2.5f, 0, Color.White, 0f);
-                //Renderer.DrawSprite(_pointTexture, planet.Position, Vector2.One * planet.Radius * 2.5f, 0, Color.White, 0f);
-
-
-                //Renderer.BeginDraw();
-                //Renderer.DrawSprite(_planetTexture, new RectangleF(10000, 0, 1085, 1085), 0.2f, 0, new Vector2(0.5f, 0.5f), Color.White, false, false);
-                //Renderer.EndDraw();
-
-                
+                if (planet.TileTexture == null)
+                    planet.GenerateTileTexture(GraphicsDevice);
+                planet.Draw(Renderer);
             }
-            Renderer.EndDraw();
-
-            if (_nearPlanet != null)
-            {
-                if (Renderer.Camera.Zoom <= 1)
-                    _nearPlanet.Draw(Renderer);
-            }
-            
             Renderer.BeginDraw();
-
-            Renderer.DrawDepth = 0.4f;
-
             _ship.Draw(Renderer);
 
             foreach (Ship s in _aiShips)
                 s.Draw(Renderer);
 
-            //altitude = _ship.Position.Length() - planetToDraw.Radius;
-            //float zoom = 1;
-            //if (altitude > 25)
-            //    zoom = altitude / 25;
-            //Renderer.Camera.ChangeZoom(zoom);
-            //_dock.Draw(Renderer);
+            DrawSun(Renderer);
+
 
             Renderer.DrawDepth = 0.5f;
             foreach (Particle p in _exhaustParticles.Particles)
@@ -439,20 +329,23 @@ namespace LitePlanet
             Renderer.EndDraw();
 
             Renderer.BeginDrawToScreen();
+            
             string frameRate = FrameRate + " FPS";
             Renderer.DrawStringBox(frameRate, new RectangleF(10, 10, 120, 10), Color.White);
-
             Renderer.DrawStringBox("Fuel: " + _ship.Fuel, new RectangleF(10, 30, 120, 10), Color.White);
             Renderer.DrawStringBox("Hull: " + _ship.Hull, new RectangleF(10, 50, 120, 10), Color.White);
-
             Renderer.DrawStringBox(_ship.Position.X + ", " + _ship.Position.Y, new RectangleF(11, 71, 200, 10), Color.White);
-            
+
+            Renderer.EndDraw();
+            //altitude = _ship.Position.Length() - planetToDraw.Radius;
+            //float zoom = 1;
+            //if (altitude > 25)
+            //    zoom = altitude / 25;
+ 
             //Renderer.DrawStringBox("Altitude: " + (_ship.Position.Length() - _planet.Radius), new RectangleF(11, 71, 200, 10), Color.White);
             
             //if (_ship.JumpDriveCharging)
             //    Renderer.DrawStringBox("Jump Drive Charging (destination: " + _systemMap.Target.Name + "): " + _ship.JumpDriveCharge.ToString("0.00") + "%", new RectangleF(11, 91, 500, 10), Color.Red);
-            
-            Renderer.EndDraw();
         }
 
         private void DrawStars(XnaRenderer renderer)
