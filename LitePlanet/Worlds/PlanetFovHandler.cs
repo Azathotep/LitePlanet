@@ -29,13 +29,20 @@ namespace LitePlanet.Worlds
         {
             PlanetTile tile = _planet.GetTile(x, y);
             if (tile != null)
-                tile.Visible = true;
+            {
+                if (!tile.Visible)
+                {
+                    tile.Visible = true;
+                    _planet.UpdateTile(tile);
+                }
+            }
         }
 
         public void RunFov(Planet planet, int x, int y, int viewRadius)
         {
             _planet = planet;
             _fov.CalculateFov(new Vector2I(x, y), viewRadius, this);
+            _planet.CommitChanges();
         }
     }
 }

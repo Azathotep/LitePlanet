@@ -70,29 +70,33 @@ PsOut PlanetPS(PlanetVsOut v)
 
         ret.Color = float4(0,0,0,0);
 
-        if (tileX % 2 == 0)
-          ret.Color.b = 1;
-        if (tileY % 2 == 0)
-          ret.Color.r = 1;
-
 	ret.Color = xTexture.Load(int3(tileX,tileY,0));
+	
+	float a = ret.Color.a;
 
-	if (ret.Color.a < 1)
-	  return ret;
-        
+	bool visible;
+        if (a > 0.05)
+           visible = true;
+        else
+	   visible = false;
         if (zoom > 30)
           return ret;
-	float tx = ret.Color.r;
-	float ty = ret.Color.g;
 
+	//calculate texture x and y for this tile	
+	float tx = ret.Color.g;
+	float ty = ret.Color.b;
 	tx = tx + tileDx * 0.23;
         ty = ty + tileDy * 0.23;
 
 	ret.Color = xTilesTexture.Sample(TextureSampler, float2(tx,ty));
 
+	if (visible)
+           return ret;
+	
+        ret.Color = float4(0,0,0,1);
+
 	if (y > 500)
           ret.Color = float4(0,0,0,0);
-
 	return ret;
 }
 

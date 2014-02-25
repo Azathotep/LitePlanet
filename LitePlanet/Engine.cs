@@ -200,7 +200,8 @@ namespace LitePlanet
                     continue;
 
                 Vector2 eye = planet.CartesianToPolar(_ship.Position);
-                _fov.RunFov(planet, (int)Math.Floor(eye.X), (int)Math.Floor(eye.Y), 30);
+                if (planet.TileTexture != null)
+                    _fov.RunFov(planet, (int)Math.Floor(eye.X), (int)Math.Floor(eye.Y), 30);
                 planet.CollisionFieldGenerator.UpdateFields();
             }
 

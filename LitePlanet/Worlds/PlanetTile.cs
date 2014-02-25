@@ -44,6 +44,22 @@ namespace LitePlanet.Worlds
             }
         }
 
+        public int X
+        {
+            get
+            {
+                return _x;
+            }
+        }
+
+        public int Y
+        {
+            get
+            {
+                return _y;
+            }
+        }
+
         public Body Body
         {
             get
@@ -98,7 +114,8 @@ namespace LitePlanet.Worlds
             if (Health == 0)
                 return;
             Health = 0;
-            _planet.UpdateTile(_x, _y, Color.Black);
+            _planet.UpdateTile(this);
+            _planet.CommitChanges();
             _collisionBody.DestroyBody();
         }
 

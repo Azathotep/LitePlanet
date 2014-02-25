@@ -303,19 +303,19 @@ namespace LitePlanet.Worlds
 
             Texture2D tileTexture = TileTexture;
             Texture2D detailTexture = renderer.ContentManager.Load<Texture2D>("brownplanet");
-            
+
             Effect effect = renderer.ContentManager.Load<Effect>("planet.mgfxo");
             effect.Parameters["xWorld"].SetValue(renderer.Camera.World);
             effect.Parameters["xProjection"].SetValue(renderer.Camera.Projection);
             effect.Parameters["xView"].SetValue(renderer.Camera.View);
-            
+           
             effect.Parameters["xTexture"].SetValue(tileTexture);
             effect.Parameters["xTilesTexture"].SetValue(detailTexture);
             
             effect.Parameters["planetPos"].SetValue(Position);
             effect.Parameters["planetWidth"].SetValue(_width);
             effect.Parameters["zoom"].SetValue(renderer.Camera.Zoom);
-            
+
             effect.Techniques["Planet"].Passes[0].Apply();
 
             renderer.GraphicsDevice.SetVertexBuffer(_quadBuffer);
@@ -325,6 +325,8 @@ namespace LitePlanet.Worlds
             renderer.GraphicsDevice.SamplerStates[0] = SamplerState.LinearWrap;
 
             renderer.GraphicsDevice.DrawPrimitives(PrimitiveType.TriangleStrip, 0, 2);
+
+            //renderer.GraphicsDevice.DrawPrimitives(PrimitiveType.TriangleStrip, 0, 2);
         }
 
         /// <summary>
@@ -342,7 +344,7 @@ namespace LitePlanet.Worlds
         public PlanetTile GetTile(int x, int y)
         {
             if (y >= _height)
-                return null; // _skyTile;
+                return null;
             if (y < 0 || y >= _height)
                 return null;
             x = (x % _width + _width) % _width;
@@ -375,7 +377,7 @@ namespace LitePlanet.Worlds
                 return _texture;
             }
         }
-
+        
         int _chunkWidth = 8;
         int _numHorizontalChunks;
         public void GenerateTileTexture(Microsoft.Xna.Framework.Graphics.GraphicsDevice device)
@@ -407,9 +409,9 @@ namespace LitePlanet.Worlds
                 case WorldTileType.Sky:
                     return 6;
                 case WorldTileType.Earth:
-                    return 0;
-                case WorldTileType.Rock:
                     return 1;
+                case WorldTileType.Rock:
+                    return 6;
                 case WorldTileType.Lava:
                     return 5;
                 case WorldTileType.SolidRock:
@@ -422,29 +424,35 @@ namespace LitePlanet.Worlds
         
         Color GetTileValue(PlanetTile tile)
         {
-            Color ret = new Color();
-            if (tile != null && tile.Type != WorldTileType.Sky && tile.Health > 0)
-            {
-                int textureId = GetTileTextureId(tile);
-                float tx = (float)(textureId % 4) * 0.25f + 0.01f;
-                float ty = (float)(textureId / 4) * 0.25f + 0.01f;
-                ret.R = (byte)(tx * 255);
-                ret.G = (byte)(ty * 255);
-                if (tile.Type == WorldTileType.Earth)
-                    ret.B = 255;
+            Color ret = new Color(0,0,0,0);
+            if (tile == null)
+                return ret;
+            
+            int typeId = GetTileTextureId(tile);
+            if (tile.Health <= 0)
+                typeId = 4;
+            ret.R = (byte)typeId;
+
+            float tx = (float)(typeId % 4) * 0.25f + 0.01f;
+            float ty = (float)(typeId / 4) * 0.25f + 0.01f;
+            ret.G = (byte)(tx * 255);
+            ret.B = (byte)(ty * 255);
+
+            ret.A = 255;
+            if (!tile.Visible)
+                ret.A = 0;
+            else
                 ret.A = 255;
-            }
             return ret;
         }
 
         HashSet<int> _modifiedChunks = new HashSet<int>();
-        internal void UpdateTile(int x, int y, Color color)
+        internal void UpdateTile(PlanetTile tile)
         {
-            int chunkX = x / _chunkWidth;
-            int chunkY = y / _chunkWidth;
+            int chunkX = tile.X / _chunkWidth;
+            int chunkY = tile.Y / _chunkWidth;
             int chunkId = chunkY * _numHorizontalChunks + chunkX;
             _modifiedChunks.Add(chunkId);
-            CommitChanges();
         }
 
 
