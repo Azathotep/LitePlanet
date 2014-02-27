@@ -35,6 +35,8 @@ namespace LitePlanet
         PlanetFovHandler _fov;
         ParticlePool _exhaustParticles;
         ParticlePool _smokeParticles;
+
+        Carrier _carrier;
         Bullets _bullets;
         Ship _ship;
         List<Ship> _aiShips = new List<Ship>();
@@ -63,9 +65,10 @@ namespace LitePlanet
 
             _exhaustParticles = ParticleSystem.CreateParticleFactory();
             _smokeParticles = ParticleSystem.CreateParticleFactory();
+
             _bullets = new Bullets(this);
-            
-            _ship = new Ship(this);
+
+            _ship = new Carrier(this); // Ship(this);
             _ship.Position = _system.Planets[0].Position - new Vector2(0, _system.Planets[0].Radius + 5);
             _ship.Rotation = (float)Math.PI;
 
@@ -81,19 +84,29 @@ namespace LitePlanet
             
             //_dock = new Dock(this);
             //_dock.Position = new Vector2(-20, 7);
-
+            Pilot pilot;
             for (int i = 0; i < 1; i++)
             {
                 Ship aiShip = new Ship(this, true);
                 aiShip.Position = new Vector2(_ship.Position.X + 60 + i * 2, _ship.Position.Y - 30);
                 aiShip.Body.Rotation = 1f;
-                Pilot pilot = new Pilot(aiShip);
+                pilot = new Pilot(aiShip);
                 _aiShips.Add(aiShip);
                 _aiPilots.Add(pilot);
                 foreach (Planet planet in _system.Planets)
                     planet.CollisionFieldGenerator.RegisterCollisionField(aiShip);
             }
-            
+
+
+            //_carrier = new Carrier(this);
+            //_carrier.Position = new Vector2(_ship.Position.X, _ship.Position.Y - 300);
+            //pilot = new Pilot(_carrier);
+            //_aiShips.Add(_carrier);
+            //_aiPilots.Add(pilot);
+            //foreach (Planet planet in _system.Planets)
+            //    planet.CollisionFieldGenerator.RegisterCollisionField(_carrier);
+
+
             Renderer.SetDeviceMode(800, 600, true);
             Renderer.Camera.SetAspect(80, 60);
             Renderer.Camera.LookAt(new Vector2(0, 0));
@@ -151,10 +164,10 @@ namespace LitePlanet
                     _ship.ApplyForwardThrust(-0.001f);
                     break;
                 case Keys.Left:
-                    _ship.ApplyRotateThrust(-0.1f);
+                    _ship.ApplyRotateThrust(-100.81f);
                     break;
                 case Keys.Right:
-                    _ship.ApplyRotateThrust(0.1f);
+                    _ship.ApplyRotateThrust(100.81f);
                     break;
                 case Keys.M:
                     _mapMode = !_mapMode;
@@ -207,6 +220,30 @@ namespace LitePlanet
 
             foreach (Pilot p in _aiPilots)
                 p.Target(this, _ship);
+
+            if (Dice.Next(500000) == 0)
+            {
+                bool validPosition = true;
+                Planet nearPlanet = GetNearPlanet(_ship.Position);
+                if (nearPlanet != null)
+                {
+                    Vector2 position = nearPlanet.Position + Dice.RandomVector(nearPlanet.Radius + 1000 + Dice.Next(500));
+                    int num = 1;
+                    if (Dice.Next(6) == 0)
+                        num = Dice.Next(5);
+                    for (int i = 0; i < num; i++)
+                    {
+                        Ship aiShip = new Ship(this, true);
+                        aiShip.Position = position;
+                        aiShip.Body.Rotation = 1f;
+                        Pilot pilot = new Pilot(aiShip);
+                        _aiShips.Add(aiShip);
+                        _aiPilots.Add(pilot);
+                        foreach (Planet planet in _system.Planets)
+                            planet.CollisionFieldGenerator.RegisterCollisionField(aiShip);
+                    }
+                }
+            }
 
             _system.Update();
         }
@@ -281,7 +318,7 @@ namespace LitePlanet
             {
                 if (planet.TileTexture == null)
                     planet.GenerateTileTexture(GraphicsDevice);
-                planet.Draw(Renderer);
+                planet.Draw(Renderer, gameTime);
             }
             Renderer.BeginDraw();
             _ship.Draw(Renderer);
@@ -289,10 +326,15 @@ namespace LitePlanet
             foreach (Ship s in _aiShips)
                 s.Draw(Renderer);
 
+            if (_nearPlanet != null)
+            {
+                foreach (Item item in _nearPlanet.Items)
+                    item.Draw(Renderer);
+            }
             DrawSun(Renderer);
 
 
-            Renderer.DrawDepth = 0.5f;
+            Renderer.DrawDepth = 0.3f;
             foreach (Particle p in _exhaustParticles.Particles)
             {
                 float particleSize = 0.8f * (p.Life / 50f);
@@ -335,8 +377,9 @@ namespace LitePlanet
             Renderer.DrawStringBox(frameRate, new RectangleF(10, 10, 120, 10), Color.White);
             Renderer.DrawStringBox("Fuel: " + _ship.Fuel, new RectangleF(10, 30, 120, 10), Color.White);
             Renderer.DrawStringBox("Hull: " + _ship.Hull, new RectangleF(10, 50, 120, 10), Color.White);
-            Renderer.DrawStringBox(_ship.Position.X + ", " + _ship.Position.Y, new RectangleF(11, 71, 200, 10), Color.White);
-
+            //Renderer.DrawStringBox(_ship.Position.X + ", " + _ship.Position.Y, new RectangleF(11, 71, 200, 10), Color.White);
+            Renderer.DrawStringBox("Gold: " + _ship.Gold, new RectangleF(10, 70, 120, 10), Color.Yellow);
+            
             Renderer.EndDraw();
             //altitude = _ship.Position.Length() - planetToDraw.Radius;
             //float zoom = 1;

@@ -1,3 +1,10 @@
+struct TileType
+{
+   int TextureId;
+   float3 ColorStart;
+   float3 ColorEnd;
+};
+
 struct PlanetVsOut
 {
     float4 Position   	: SV_POSITION;
@@ -18,6 +25,7 @@ float4x4 xProjection;
 float4x4 xWorld;
 float zoom;
 float2 planetPos;
+float wav;
 int planetWidth;
 
 //------- Texture Samplers --------
@@ -71,7 +79,7 @@ PsOut PlanetPS(PlanetVsOut v)
         ret.Color = float4(0,0,0,0);
 
 	ret.Color = xTexture.Load(int3(tileX,tileY,0));
-	
+	float i = ret.Color.r;
 	float a = ret.Color.a;
 
 	bool visible;
@@ -91,8 +99,9 @@ PsOut PlanetPS(PlanetVsOut v)
 	ret.Color = xTilesTexture.Sample(TextureSampler, float2(tx,ty));
 
 	if (visible)
+        {
            return ret;
-	
+	}
         ret.Color = float4(0,0,0,1);
 
 	if (y > 500)

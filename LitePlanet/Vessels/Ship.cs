@@ -29,11 +29,13 @@ namespace LitePlanet.Vessels
         
         protected Engine _engine;
         bool _hostile;
+        protected float _maxSpeed = 100;
         public Ship(Engine engine, bool other=false)
         {
             _engine = engine;
             _cannon = new Cannon();
             _body = CreateBody();
+            _hull = 100;
             if (other)
                 _hostile = true;
             if (_hostile)
@@ -52,7 +54,7 @@ namespace LitePlanet.Vessels
             body.LinearVelocity = new Vector2(0, 5);
             FixtureFactory.AttachPolygon(new Vertices(new Vector2[] { new Vector2(0f, -0.4f), new Vector2(0.35f, 0.4f), new Vector2(-0.35f, 0.4f) }), 1f, body);
             body.CollisionCategories = Category.Cat2;
-            body.CollidesWith = Category.Cat1 | Category.Cat2;
+            body.CollidesWith = Category.Cat1 | Category.Cat2 | Category.Cat3;
             return body;
         }
 
@@ -162,13 +164,10 @@ namespace LitePlanet.Vessels
             _fuel--;
             _body.ApplyForce(Facing * amount);
             float len = _body.LinearVelocity.LengthSquared();
-            
-            float maxSpeed = 160;
-            if (_hostile)
-                maxSpeed = 160;
-            if (len > maxSpeed)
-                _body.LinearVelocity *= maxSpeed / len;
-            int max = 1;
+
+            if (len > _maxSpeed)
+                _body.LinearVelocity *= _maxSpeed / len;
+            int max = 0;
             s++;
             for (int i = 0; i < max; i++)
             {
@@ -213,8 +212,18 @@ namespace LitePlanet.Vessels
             }
         }
 
+        public int Gold = 0;
+
         public void OnCollideWith(IPhysicsObject self, IPhysicsObject other, float impulse)
         {
+            if (other is Item)
+            {
+                Item item = other as Item;
+                item.Remove();
+                Gold++;
+                return;
+            }
+
             TakeDamage((int)Math.Pow(impulse * 2, 2));
 
             //IDamageSink sink = other as IDamageSink;

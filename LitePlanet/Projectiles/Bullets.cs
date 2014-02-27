@@ -26,6 +26,8 @@ namespace LitePlanet.Projectiles
             particle.Body.IsBullet = true;
             particle.Body.CollidesWith = Category.Cat1 | Category.Cat2;
             particle.Body.CollisionCategories = Category.Cat2;
+            particle.Body.Enabled = false;
+            particle.Body.Enabled = true;
             particle.OnCollideWithOther += particle_OnCollideWithOther;
             return particle;
         }
@@ -33,8 +35,8 @@ namespace LitePlanet.Projectiles
         void particle_OnCollideWithOther(Particle particle, IPhysicsObject other, float impulse)
         {
             particle.Life = 0;
-            Explosion explosion = new Explosion(_engine);
-            explosion.Create(particle.Position);
+            //Explosion explosion = new Explosion(_engine);
+            //explosion.Create(particle.Position);
             IDamageSink damageSink = other as IDamageSink;
             if (damageSink != null)
                 damageSink.TakeDamage(20);

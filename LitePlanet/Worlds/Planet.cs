@@ -99,7 +99,7 @@ namespace LitePlanet.Worlds
                             type = WorldTileType.SolidRock;
                     
                     if (y < _crustDepth - 10)
-                        if (LiteEngine.Core.Dice.Next(1500) == 0)
+                        if (LiteEngine.Core.Dice.Next(100) == 0)
                             type = WorldTileType.Gold;
                     
                     _tiles[x, y] = new PlanetTile(this, x, _height - _crustDepth + y, type);
@@ -288,7 +288,7 @@ namespace LitePlanet.Worlds
         //}
 
         VertexBuffer _quadBuffer = null;
-        public void Draw(XnaRenderer renderer)
+        public void Draw(XnaRenderer renderer, GameTime gameTime)
         {
             if (_quadBuffer == null)
             {
@@ -315,7 +315,7 @@ namespace LitePlanet.Worlds
             effect.Parameters["planetPos"].SetValue(Position);
             effect.Parameters["planetWidth"].SetValue(_width);
             effect.Parameters["zoom"].SetValue(renderer.Camera.Zoom);
-
+            effect.Parameters["wav"].SetValue((float)Math.Sin((double)gameTime.TotalGameTime.TotalSeconds));
             effect.Techniques["Planet"].Passes[0].Apply();
 
             renderer.GraphicsDevice.SetVertexBuffer(_quadBuffer);
@@ -431,7 +431,7 @@ namespace LitePlanet.Worlds
             int typeId = GetTileTextureId(tile);
             if (tile.Health <= 0)
                 typeId = 4;
-            ret.R = (byte)typeId;
+            ret.R = 255;
 
             float tx = (float)(typeId % 4) * 0.25f + 0.01f;
             float ty = (float)(typeId / 4) * 0.25f + 0.01f;
@@ -483,6 +483,26 @@ namespace LitePlanet.Worlds
                 _texture.SetData<byte>(0, r, _chunkData, 0, 0);
             }
             _modifiedChunks.Clear();
+        }
+
+        List<Item> _items = new List<Item>();
+        public List<Item> Items
+        {
+            get
+            {
+                return _items;
+            }
+        }
+
+        internal void DropItem(Vector2 position)
+        {
+            Item item = new Item(this, _physics, position);
+            _items.Add(item);
+        }
+
+        internal void RemoveItem(Item item)
+        {
+            _items.Remove(item);
         }
     }
 

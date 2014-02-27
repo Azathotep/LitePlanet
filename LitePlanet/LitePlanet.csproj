@@ -68,6 +68,9 @@
     <Content Include="Content\grass.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Content\largeship.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Content\planet.fx" />
     <Content Include="Content\planet.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
