@@ -68,7 +68,7 @@ namespace LitePlanet
 
             _bullets = new Bullets(this);
 
-            _ship = new Carrier(this); // Ship(this);
+            _ship = new Ship(this); // new Carrier(this); // Ship(this);
             _ship.Position = _system.Planets[0].Position - new Vector2(0, _system.Planets[0].Radius + 5);
             _ship.Rotation = (float)Math.PI;
 
@@ -85,10 +85,10 @@ namespace LitePlanet
             //_dock = new Dock(this);
             //_dock.Position = new Vector2(-20, 7);
             Pilot pilot;
-            for (int i = 0; i < 1; i++)
+            for (int i = 0; i < 0; i++)
             {
                 Ship aiShip = new Ship(this, true);
-                aiShip.Position = new Vector2(_ship.Position.X + 60 + i * 2, _ship.Position.Y - 30);
+                aiShip.Position = new Vector2(_ship.Position.X + 60 + i * 2, _ship.Position.Y - 100);
                 aiShip.Body.Rotation = 1f;
                 pilot = new Pilot(aiShip);
                 _aiShips.Add(aiShip);
@@ -97,15 +97,16 @@ namespace LitePlanet
                     planet.CollisionFieldGenerator.RegisterCollisionField(aiShip);
             }
 
-
-            //_carrier = new Carrier(this);
-            //_carrier.Position = new Vector2(_ship.Position.X, _ship.Position.Y - 300);
-            //pilot = new Pilot(_carrier);
-            //_aiShips.Add(_carrier);
-            //_aiPilots.Add(pilot);
-            //foreach (Planet planet in _system.Planets)
-            //    planet.CollisionFieldGenerator.RegisterCollisionField(_carrier);
-
+            for (int i = 0; i < 2; i++)
+            {
+                _carrier = new Carrier(this);
+                _carrier.Position = new Vector2(_ship.Position.X + i * 20, _ship.Position.Y - 100);
+                pilot = new Pilot(_carrier);
+                _aiShips.Add(_carrier);
+                _aiPilots.Add(pilot);
+                foreach (Planet planet in _system.Planets)
+                    planet.CollisionFieldGenerator.RegisterCollisionField(_carrier);
+            }
 
             Renderer.SetDeviceMode(800, 600, true);
             Renderer.Camera.SetAspect(80, 60);
@@ -164,10 +165,10 @@ namespace LitePlanet
                     _ship.ApplyForwardThrust(-0.001f);
                     break;
                 case Keys.Left:
-                    _ship.ApplyRotateThrust(-100.81f);
+                    _ship.ApplyRotateThrust(-0.081f);
                     break;
                 case Keys.Right:
-                    _ship.ApplyRotateThrust(100.81f);
+                    _ship.ApplyRotateThrust(0.081f); //100
                     break;
                 case Keys.M:
                     _mapMode = !_mapMode;
@@ -220,6 +221,14 @@ namespace LitePlanet
 
             foreach (Pilot p in _aiPilots)
                 p.Target(this, _ship);
+
+            foreach (Ship s in _aiShips)
+            {
+                Carrier carrier = s as Carrier;
+                if (carrier != null)
+                    carrier.Target(_ship);
+            }
+            
 
             if (Dice.Next(500000) == 0)
             {
@@ -354,16 +363,20 @@ namespace LitePlanet
 
             foreach (Particle p in _bullets.Particles)
             {
-                float particleSize = 0.5f;
                 float alpha = 0f;
-                Color color = Color.Lerp(Color.Cyan, Color.Blue, Dice.Next());
-                p.Draw(Renderer, particleSize, color, alpha);
+                //Color color = Color.Lerp(Color.Cyan, Color.Blue, Dice.Next());
+                Color color = Color.Lerp(Color.LightPink, Color.Red, Dice.Next());
 
-                particleSize = 0.9f;
-                p.Draw(Renderer, particleSize, color, alpha);
 
-                particleSize = 1.2f;
-                p.Draw(Renderer, particleSize, Color.White, alpha);
+                Vector2 size = new Vector2(0.3f, 2);
+                float rotation = Util.AngleBetween(new Vector2(0, 1), p.Velocity);
+                p.Draw(Renderer, size, color, alpha, rotation);
+
+                size *= 1.2f;
+                p.Draw(Renderer, size, color, alpha, rotation);
+
+                size *= 1.2f;
+                p.Draw(Renderer, size, Color.White, alpha, rotation);
             }
 
             //_building.Draw(Renderer);

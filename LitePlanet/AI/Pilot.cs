@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using LitePlanet.Vessels;
+using LiteEngine.Math;
 
 namespace LitePlanet.AI
 {
@@ -15,33 +16,20 @@ namespace LitePlanet.AI
             _ship = ship;
         }
 
-        /// <summary>
-        /// Distance in radians to go from a1 to a2
-        /// </summary>
-        /// <param name="a1">angle in radians</param>
-        /// <param name="a2">angle in radians</param>
-        /// <returns></returns>
-        float AngleBetween(float a1, float a2)
-        {
-            float dif = MathHelper.WrapAngle(a2 - a1);
-            return dif;
-        }
-
         public void RotateToFace(float angle)
         {
             float targetHeading = angle;
             float heading = _ship.Rotation + _ship.Body.AngularVelocity * 0.1f;
-            float angleDist = AngleBetween(heading, targetHeading);
-            if (angleDist > 0.01f)
-                _ship.ApplyRotateThrust(0.2f);
-            else if (angleDist < -0.01f)
-                _ship.ApplyRotateThrust(-0.2f);
-        }
+            float angleDist = Util.AngleBetween(heading, targetHeading);
 
-        float AngleFrom(Vector2 start, Vector2 destination)
-        {
-            Vector2 v = destination - start;
-            return (float)Math.Atan2(v.X, -v.Y);
+            float thrust = 0.2f;
+            if (_ship.Body.Mass > 1)
+                thrust = 10f;
+
+            if (angleDist > 0.01f)
+                _ship.ApplyRotateThrust(thrust);
+            else if (angleDist < -0.01f)
+                _ship.ApplyRotateThrust(-thrust);
         }
 
         int s = 0;
@@ -52,17 +40,15 @@ namespace LitePlanet.AI
                 return;
 
             Vector2 aimPoint = target.Position + target.Velocity * LiteEngine.Core.Dice.Next() * 1;
-
             float dist = Vector2.Distance(target.Position, _ship.Position);
-
-            float angle = AngleFrom(_ship.Position, aimPoint);
+            float angle = Util.AngleBetween(_ship.Position, aimPoint);
             RotateToFace(angle);
 
             if (s > 0)
                 s--;
             if (dist < 40 && s == 0)
             {
-                if (Math.Abs(AngleBetween(_ship.Rotation, angle)) < 0.2f)
+                if (Math.Abs(Util.AngleBetween(_ship.Rotation, angle)) < 0.2f)
                     _ship.PrimaryWeapon.Fire(engine, _ship, _ship.Position, _ship.Facing);
                 s = 20;
             }
@@ -80,9 +66,11 @@ namespace LitePlanet.AI
 
             RotateToFace(angle);
 
-            if (Math.Abs(AngleBetween(_ship.Rotation, angle)) < 0.3f)
-                _ship.ApplyForwardThrust(2f);
-
+            float thrust = 2f;
+            if (_ship.Body.Mass > 1)
+                thrust = 20f;
+            if (Math.Abs(Util.AngleBetween(_ship.Rotation, angle)) < 0.3f)
+                _ship.ApplyForwardThrust(thrust);
         }
     }
 }

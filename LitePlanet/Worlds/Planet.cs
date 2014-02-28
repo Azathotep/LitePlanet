@@ -106,6 +106,9 @@ namespace LitePlanet.Worlds
 
                     if (nf.Values[x, y] < 0.4f)
                         _tiles[x, y].Health = 0;
+
+                    if (y == _crustDepth - 1)
+                        _tiles[x, y].Visible = true;
                 }
         }
 

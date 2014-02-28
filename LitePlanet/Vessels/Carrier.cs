@@ -22,16 +22,22 @@ namespace LitePlanet.Vessels
     class Carrier : Ship
     {
         static Texture _texture = new Texture("largeship", new RectangleI(128-38,0, 38, 128));
-        static Texture _turretTexture = new Texture("largeship", new RectangleI(0, 0, 32, 32));
         static Texture _redTexture = new Texture("redship");
         static Texture _circleTexture = new Texture("circleOverlay");
         Cannon _cannon;
+        Turret[] _turrets = new Turret[3];
         public Carrier(Engine engine) : base(engine)
         {
             _cannon = new Cannon();
             //Body.Mass = 10;
             _hull = 10000;
             _maxSpeed = 20;
+
+            for (int i = 0; i < 3; i++)
+            {
+                Vector2 turretPosition = new Vector2(0f, (i - 1) * 3.5f);
+                _turrets[i] = new Turret(this, turretPosition);
+            }
         }
 
         protected override Body CreateBody()
@@ -62,31 +68,84 @@ namespace LitePlanet.Vessels
             if (_hull <= 0)
                 return;
 
-            for (int i = 0; i < 3; i++)
-            {
-                _turretRot[i] += 0.02f * _turretSpinDir[i];
-                if (Dice.Next(300) == 0)
-                    _turretSpinDir[i] *= -1;
-            }
-
             Texture texture = _texture;
             renderer.DrawDepth = 0.5f;
             renderer.DrawSprite(texture, Position, new Vector2(3f, 12f), Rotation);
             renderer.DrawDepth = 0.2f;
 
             f++;
-            for (int i = 0; i < 3; i++)
+            foreach (Turret turret in _turrets)
             {
-                float totalRot = Rotation + _turretRot[i];
-                Vector2 turretPosition = Position + Vector2.Transform(new Vector2(0f, (i - 1) * 3.5f), Matrix.CreateRotationZ(Rotation));
-                renderer.DrawSprite(_turretTexture, turretPosition, new Vector2(2f, 2f), totalRot);
-                if (Dice.Next(125) == 0)
-                {
-                    _cannon.Fire(_engine, this, turretPosition, new Vector2((float)Math.Sin(totalRot), (float)-Math.Cos(totalRot)));
-                }
+                turret.Draw(renderer);
             }
+        }
+
+        public void TurnTurretTowards(Turret turret, Vector2 target)
+        {
+            float a = Util.AngleBetween(turret.Position, target);
+            float angle = Util.AngleBetween(turret.Rotation, a);
+            if (angle > 0.1f)
+                turret.Rotate(0.05f);
+            else if (angle < -0.1f)
+                turret.Rotate(-0.05f);
             
-            //renderer.DrawSprite(texture, Position - Facing * 0.8f, new Vector2(1f, 1f), Rotation + (float)Math.PI);
+            if (Math.Abs(angle) < 0.2f && Dice.Next(20) == 0 && Vector2.Distance(Position, target) < 40f)
+                turret.Fire(_engine);
+        }
+
+        internal void Target(Ship ship)
+        {
+            foreach (Turret t in _turrets)
+                TurnTurretTowards(t, ship.Position);
+        }
+    }
+
+    class Turret
+    {
+        static Texture _turretTexture = new Texture("largeship", new RectangleI(0, 0, 32, 32));
+        Cannon _cannon = new Cannon();
+        Ship _owner;
+        float _relativeRotation;
+        Vector2 _relativePosition;
+
+        public Turret(Ship owner, Vector2 relativePosition)
+        {
+            _owner = owner;
+            _relativePosition = relativePosition;
+        }
+
+        public Vector2 Position
+        {
+            get
+            {
+                Vector2 ret = _owner.Position + Vector2.Transform(_relativePosition, Matrix.CreateRotationZ(_owner.Rotation));
+                return ret;
+            }
+        }
+
+        public float Rotation
+        {
+            get
+            {
+                return _relativeRotation + _owner.Rotation;
+            }
+        }
+
+        public void Rotate(float amount)
+        {
+            _relativeRotation += amount;
+        }
+
+        public void Draw(XnaRenderer renderer)
+        {
+            float totalRot = Rotation;
+            renderer.DrawSprite(_turretTexture, Position, new Vector2(2f, 2f), totalRot);
+        }
+
+        internal void Fire(Engine engine)
+        {
+            float totalRot = Rotation;
+            _cannon.Fire(engine, _owner, Position, new Vector2((float)Math.Sin(totalRot), (float)-Math.Cos(totalRot)));
         }
     }
 }

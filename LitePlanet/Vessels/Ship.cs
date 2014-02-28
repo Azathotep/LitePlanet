@@ -33,7 +33,7 @@ namespace LitePlanet.Vessels
         public Ship(Engine engine, bool other=false)
         {
             _engine = engine;
-            _cannon = new Cannon();
+            _cannon = new Cannon(10);
             _body = CreateBody();
             _hull = 100;
             if (other)
@@ -167,20 +167,26 @@ namespace LitePlanet.Vessels
 
             if (len > _maxSpeed)
                 _body.LinearVelocity *= _maxSpeed / len;
-            int max = 0;
+            int max = 1;
             s++;
             for (int i = 0; i < max; i++)
             {
                 Vector2 vel = Velocity - Facing * 5.1f;
                 vel.X += Dice.Next() * 1.6f - 0.8f;
                 vel.Y += Dice.Next() * 1.6f - 0.8f;
-                Particle exhaust = _engine.ExhaustParticles.CreateParticle(Position, vel, 50);
+
+                float length = 1;
+                if (_body.Mass > 1)
+                    length = 12;
+
+                Vector2 enginePosition = Position - Facing * length * 0.5f;
+                Particle exhaust = _engine.ExhaustParticles.CreateParticle(enginePosition, vel, 50);
                 if (exhaust == null)
                     break;
                 exhaust.Body.CollidesWith = Category.Cat1;
                 exhaust.Body.CollisionCategories = Category.Cat6;
-                Vector2 p = Position - Facing * 0.7f + Dice.RandomVector(0.3f);
-                _engine.SmokeParticles.CreateParticle(p, Velocity * 0, 50);
+                //Vector2 p = enginePosition + Dice.RandomVector(0.3f); // Position - Facing * 0.7f 
+                //_engine.SmokeParticles.CreateParticle(p, Velocity * 0, 50);
             }
         }
 
