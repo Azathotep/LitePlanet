@@ -26,7 +26,10 @@ namespace LitePlanet.Vessels
         static Texture _texture = new Texture("rocketship");
         static Texture _redTexture = new Texture("redship");
         static Texture _circleTexture = new Texture("circleOverlay");
-        
+        static Texture _triangleTexture = new Texture("triangleOverlay");
+
+        protected float _engineMaxThrust = 5f;
+
         protected Engine _engine;
         bool _hostile;
         protected float _maxSpeed = 100;
@@ -51,7 +54,6 @@ namespace LitePlanet.Vessels
             body.Restitution = 1.1f;
             body.Mass = 0.5f;
             body.Rotation = 0f;
-            body.LinearVelocity = new Vector2(0, 5);
             FixtureFactory.AttachPolygon(new Vertices(new Vector2[] { new Vector2(0f, -0.4f), new Vector2(0.35f, 0.4f), new Vector2(-0.35f, 0.4f) }), 1f, body);
             body.CollisionCategories = Category.Cat2;
             body.CollidesWith = Category.Cat1 | Category.Cat2 | Category.Cat3;
@@ -156,38 +158,24 @@ namespace LitePlanet.Vessels
             }
         }
 
+
+        protected float _enginePercent;
+        float _engineTargetPercent;
+        internal void ActivateEngines(float percent=1)
+        {
+            _engineTargetPercent = percent;
+            if (_body.Mass < 1)
+                _enginePercent = 1;
+        }
+
         int s = 0;
         public void ApplyForwardThrust(float amount)
         {
-            if (_fuel <= 0)
-                return;
-            _fuel--;
             _body.ApplyForce(Facing * amount);
             float len = _body.LinearVelocity.LengthSquared();
 
             if (len > _maxSpeed)
                 _body.LinearVelocity *= _maxSpeed / len;
-            int max = 1;
-            s++;
-            for (int i = 0; i < max; i++)
-            {
-                Vector2 vel = Velocity - Facing * 5.1f;
-                vel.X += Dice.Next() * 1.6f - 0.8f;
-                vel.Y += Dice.Next() * 1.6f - 0.8f;
-
-                float length = 1;
-                if (_body.Mass > 1)
-                    length = 12;
-
-                Vector2 enginePosition = Position - Facing * length * 0.5f;
-                Particle exhaust = _engine.ExhaustParticles.CreateParticle(enginePosition, vel, 50);
-                if (exhaust == null)
-                    break;
-                exhaust.Body.CollidesWith = Category.Cat1;
-                exhaust.Body.CollisionCategories = Category.Cat6;
-                //Vector2 p = enginePosition + Dice.RandomVector(0.3f); // Position - Facing * 0.7f 
-                //_engine.SmokeParticles.CreateParticle(p, Velocity * 0, 50);
-            }
         }
 
         public void ApplyRotateThrust(float amount)
@@ -204,17 +192,14 @@ namespace LitePlanet.Vessels
                 texture = _redTexture;
             renderer.DrawSprite(texture, Position, new Vector2(1f, 1f), Rotation);
 
-            if (renderer.Camera.Zoom > 3)
+            if (renderer.Camera.Zoom > 2)
             {
                 float width = renderer.Camera.Zoom;
 
-                Color c = Color.FromNonPremultiplied(0, 255, 0, 255);
+                Color c = Color.FromNonPremultiplied(new Vector4(0,1,0,1));
                 if (_hostile)
-                    c = Color.FromNonPremultiplied(255, 0, 0, 255);
-                renderer.DrawSprite(_circleTexture, Position, new Vector2(width, width), 0f, c, 1f);
-
-                Vector2 front = Position + Facing * 2;
-                renderer.DrawSprite(_circleTexture, new Vector2(front.X, front.Y - 0.5f), new Vector2(width * 0.2f, width * 2), Rotation, c, 1f);
+                    c = Color.Red;
+                renderer.DrawSprite(_triangleTexture, Position, new Vector2(width, width), Rotation, c, 0f);
             }
         }
 
@@ -267,10 +252,41 @@ namespace LitePlanet.Vessels
 
         internal void Update()
         {
-            if (_jumpDriveOn)
+            if (_enginePercent < _engineTargetPercent)
+                _enginePercent = Math.Min(_enginePercent + 0.01f, _engineTargetPercent);
+            else
+                _enginePercent = Math.Max(_enginePercent - 0.01f, 0);
+            float thrust = _engineMaxThrust * _enginePercent;
+
+            if (_fuel <= 0)
+                return;
+            _fuel -= (int)thrust;
+            if (_fuel < 0)
+                _fuel = 0;
+
+            ApplyForwardThrust(thrust);
+
+            Vector2 vel = Velocity - Facing * 5.1f;
+            vel.X += Dice.Next() * 1.6f - 0.8f;
+            vel.Y += Dice.Next() * 1.6f - 0.8f;
+
+            if (_body.Mass > 1)
+                return;
+            Vector2 enginePosition = Position - Facing * 0.6f;
+            float power = _enginePercent;
+            if (Dice.Next() < power)
             {
-                _jumpCharge += 0.1f;
+                Particle exhaust = _engine.ExhaustParticles.CreateParticle(enginePosition, vel, 50);
+                if (exhaust == null)
+                    return;
+                exhaust.Body.CollidesWith = Category.Cat1;
+                exhaust.Body.CollisionCategories = Category.Cat6;
             }
+
+            _engineTargetPercent = 0;
+            _enginePercent = 0;
+            //Vector2 p = enginePosition + Dice.RandomVector(0.3f); // Position - Facing * 0.7f 
+            //_engine.SmokeParticles.CreateParticle(p, Velocity * 0, 50);
         }
     }
 }

@@ -38,6 +38,8 @@ namespace LitePlanet.Vessels
                 Vector2 turretPosition = new Vector2(0f, (i - 1) * 3.5f);
                 _turrets[i] = new Turret(this, turretPosition);
             }
+
+            _engineMaxThrust = 10f;
         }
 
         protected override Body CreateBody()
@@ -50,6 +52,7 @@ namespace LitePlanet.Vessels
             body.Mass = 10f;
             body.Rotation = 0f;
             body.LinearVelocity = new Vector2(0, 0);
+
 
             FixtureFactory.AttachPolygon(new Vertices(new Vector2[] { new Vector2(-1.5f, -5f), new Vector2(1.5f, -6f), new Vector2(1.5f, 5f), new Vector2(-1.5f, 6f) }), 1f, body);
 
@@ -78,6 +81,16 @@ namespace LitePlanet.Vessels
             {
                 turret.Draw(renderer);
             }
+
+            float power = _enginePercent;
+            Texture t = new Texture("particle");
+            Color c = Color.Cyan;
+            Vector2 d = Dice.RandomVector(0.02f);
+            c *= 0.4f * power;
+            renderer.DrawSprite(t, Position - Facing * 5.5f + d, new Vector2(1.2f, 0.8f), Rotation, c, 0);
+            c = Color.White;
+            c *= 0.6f * power;
+            renderer.DrawSprite(t, Position - Facing * 5.5f + d, new Vector2(1f, 0.4f) * power, Rotation, c, 0);
         }
 
         public void TurnTurretTowards(Turret turret, Vector2 target)

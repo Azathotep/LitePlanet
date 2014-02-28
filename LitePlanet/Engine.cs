@@ -69,9 +69,8 @@ namespace LitePlanet
             _bullets = new Bullets(this);
 
             _ship = new Ship(this); // new Carrier(this); // Ship(this);
-            _ship.Position = _system.Planets[0].Position - new Vector2(0, _system.Planets[0].Radius + 5);
+            _ship.Position = _system.Planets[0].Position - new Vector2(0, _system.Planets[0].Radius + 25);
             _ship.Rotation = (float)Math.PI;
-
             foreach (Planet planet in _system.Planets)
                 planet.CollisionFieldGenerator.RegisterCollisionField(_ship);
             
@@ -85,7 +84,7 @@ namespace LitePlanet
             //_dock = new Dock(this);
             //_dock.Position = new Vector2(-20, 7);
             Pilot pilot;
-            for (int i = 0; i < 0; i++)
+            for (int i = 0; i < 3; i++)
             {
                 Ship aiShip = new Ship(this, true);
                 aiShip.Position = new Vector2(_ship.Position.X + 60 + i * 2, _ship.Position.Y - 100);
@@ -95,9 +94,10 @@ namespace LitePlanet
                 _aiPilots.Add(pilot);
                 foreach (Planet planet in _system.Planets)
                     planet.CollisionFieldGenerator.RegisterCollisionField(aiShip);
+                _system.AddShip(aiShip);
             }
 
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 1; i++)
             {
                 _carrier = new Carrier(this);
                 _carrier.Position = new Vector2(_ship.Position.X + i * 20, _ship.Position.Y - 100);
@@ -106,6 +106,7 @@ namespace LitePlanet
                 _aiPilots.Add(pilot);
                 foreach (Planet planet in _system.Planets)
                     planet.CollisionFieldGenerator.RegisterCollisionField(_carrier);
+                _system.AddShip(_carrier);
             }
 
             Renderer.SetDeviceMode(800, 600, true);
@@ -159,7 +160,7 @@ namespace LitePlanet
                     Exit();
                     break;
                 case Keys.Up:
-                    _ship.ApplyForwardThrust(10f);
+                    _ship.ActivateEngines();
                     break;
                 case Keys.L:
                     _ship.ApplyForwardThrust(-0.001f);
@@ -228,7 +229,7 @@ namespace LitePlanet
                 if (carrier != null)
                     carrier.Target(_ship);
             }
-            
+
 
             if (Dice.Next(500000) == 0)
             {
@@ -276,7 +277,7 @@ namespace LitePlanet
             for (float f = 10000; f > 2; f -= 100f)
             {
                 float n = f + Dice.Next() * 100f;
-                renderer.DrawSprite(_pointTexture, new Vector2(20, 0), new Vector2(n, n), 0, color, 0f);
+                renderer.DrawSprite(_pointTexture, new Vector2(20, 0), new Vector2(n, n), 0, color, 1f);
             }
 
             color = Color.Orange;
@@ -284,7 +285,7 @@ namespace LitePlanet
             for (float f = 10200; f > 2; f -= 300f)
             {
                 float n = f;// +Dice.Next() * 2f;
-                renderer.DrawSprite(_pointTexture, new Vector2(20, 0), new Vector2(n, n), 0, color, 0f);
+                renderer.DrawSprite(_pointTexture, new Vector2(20, 0), new Vector2(n, n), 0, color, 1f);
             }
 
             color = Color.White;
@@ -292,7 +293,7 @@ namespace LitePlanet
             for (float f = 10000; f > 2; f -= 500f)
             {
                 float n = f +Dice.Next() * 200f;
-                renderer.DrawSprite(_pointTexture, new Vector2(20, 0), new Vector2(n, n), 0, color, 0f);
+                renderer.DrawSprite(_pointTexture, new Vector2(20, 0), new Vector2(n, n), 0, color, 1f);
             }
         }
 
@@ -342,14 +343,13 @@ namespace LitePlanet
             }
             DrawSun(Renderer);
 
-
             Renderer.DrawDepth = 0.3f;
             foreach (Particle p in _exhaustParticles.Particles)
             {
                 float particleSize = 0.8f * (p.Life / 50f);
                 float alpha = (float)p.Life * p.Life / (50 * 50);
                 Color color = new Color(1, 1, (float)p.Life / 60f);
-                p.Draw(Renderer, particleSize, color, 0); //alpha);
+                p.Draw(Renderer, particleSize, color, 0);
             }
 
             foreach (Particle p in _smokeParticles.Particles)

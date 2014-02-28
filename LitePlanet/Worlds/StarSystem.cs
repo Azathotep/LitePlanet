@@ -35,7 +35,7 @@ namespace LitePlanet.Worlds
             planet.AtmosphereAlpha = 0.2f;
             planet.AtmosphereColor = Color.Pink;
             planet.RockColor = Color.White;
-            planets.Add(planet);
+            _planets.Add(planet);
         }
 
         public void AddShip(Ship ship)

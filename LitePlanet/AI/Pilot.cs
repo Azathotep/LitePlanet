@@ -66,11 +66,10 @@ namespace LitePlanet.AI
 
             RotateToFace(angle);
 
-            float thrust = 2f;
-            if (_ship.Body.Mass > 1)
-                thrust = 20f;
             if (Math.Abs(Util.AngleBetween(_ship.Rotation, angle)) < 0.3f)
-                _ship.ApplyForwardThrust(thrust);
+                _ship.ActivateEngines(1);
+            else
+                _ship.ActivateEngines(0);
         }
     }
 }
